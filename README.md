@@ -1,5 +1,6 @@
 # frontend
-Contains various code examples usable at frontend development
+Contains various code examples usable at frontend development.
+To see how would HTML page looks like add (after click on page) prefix **https://htmlpreview.github.io/?**
 
 ## complete codes
 * [primes.html](primes.html) - contains example of **generating primes** and check whether number **isPrime**
