@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+
+
+        function drawFlowerInner(ctx, x, y) {
+            let petalDistances = 20;
+            var centerY = y-(petalDistances/2)/Math.cos((90-54) *  Math.PI/180)
+            var centerX = x;
+            for (var i = 0; i <= 3; i++) {
+                drawPetal(ctx, 12, x, y, "red");
+                let yDelta = petalDistances * Math.sin(i*72 *  Math.PI/180);
+                let xDelta = petalDistances * Math.cos(i*72 *  Math.PI/180);
+                x += xDelta;
+                y -= yDelta;
+            }
+
+            drawPetal(ctx, 12, centerX, centerY, "yellow");
+
+
+        }
+
+        function drawPetal(ctx, petalSize, x, y, color) {
+            console.log("x, y, color ", x, y, color)
+            ctx.beginPath();
+
+            ctx.moveTo(x, y);
+            ctx.arc(x, y, petalSize, 0, 2 * Math.PI);
+            ctx.fillStyle = color
+            ctx.fill();
+            ctx.strokeStyle = color
+            ctx.stroke(); 
+        }
+        
+        function drawFlowers(numOfFlowers) {
+            var ctx = clearDrawingCtx();
+            ctx.beginPath();
+            
+            for (let i = 0; i<=numOfFlowers; i++) {
+                let randX = Math.floor(Math.random()*ctx.canvas.width);
+                let randY = Math.floor(Math.random()*ctx.canvas.height);
+                drawFlowerInner(ctx, randX, randY);
+            }
+        }
+
+        function onLoad() {
+            drawFlowers(10);
+        }
+
+        function clearDrawingCtx() {
+            var canv = document.getElementById("canv1");
+            var ctx = canv.getContext("2d");            
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            console.log("after clear canvas ", ctx.canvas.width, ctx.canvas.height);
+            return ctx;
+        }
+    </script>
+</head>
+<body onload="onLoad()">
+
+    <h2>Drawing on canvas flowers</h2>
+    <canvas id="canv1" width="500" height="700" style="border:1px solid #000000"/>
+
+</body>
+</html> 
