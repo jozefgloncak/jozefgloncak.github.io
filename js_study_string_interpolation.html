@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        function stringInterpolation() {
+            var v1 = 10;
+            var v2 = 15;
+            var strTemplate = 
+`Viac riadkovy 
+zapis, ktory umoznuje vytvorit 
+retazec na viaceryc riadkov bez potreby spajania a zahrnut do 
+neho aj premenne ${v1}, ${v2} alebo vypocty ${v1 + v2}.`
+            document.getElementById("par").innerHTML = strTemplate;
+            console.log(strTemplate);
+        }
+    </script>
+</head>
+<body onload="stringInterpolation()">
+
+<h2>Primes to 100</h2>
+<p>My first paragraph.</p>
+
+<p id="par" ></p>
+
+
+</body>
+</html> 

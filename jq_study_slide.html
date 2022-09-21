@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("#btn").click(function() {
+    $("div").slideToggle(1000);
+    $("p").slideToggle(1000);
+  });
+});
+</script>
+</head>
+<body>
+    <input id="btn" type="button" name="btn" value="slideToggle"/>
+    <div style="width:50px;height:50px;background-color:red"></div>
+    <p id="par">some paragraph which is really very very long<br />and is over several rows</p>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  var elements = $("h1").siblings(); //get all siblings of h1 element
+
+  var contentOfAttr1 = "";
+  for(var i = 0; i<elements.length; i++) { //iterate over siblings
+  	var attr1 = $(elements[i]).attr("attr1"); 
+
+    if (attr1) { //if 'attr1' attribute exists get its value and add it to others
+    	contentOfAttr1 += attr1 + "<br /> ";
+    }
+  }
+  
+  $("#result").html(contentOfAttr1);
+
+});
+</script>
+</head>
+<body>
+
+<h1>Welcome to My Homepage</h1>
+
+<p>My name is Donald.</p>
+<p class="intro" attr1="val1">I live in Duckburg.</p>
+<p class="intro">I love Duckburg.</p>
+<p attr1="val3" >My best friend is Mickey.</p>
+<span>Some span</span>
+<span attr1="val4">Some other span</span>
+
+<hr>
+<p>Values from attr1 attribute of HTML elements:<br /> <span style="color:red" id="result"></span></p>
+
+</body>
+</html>

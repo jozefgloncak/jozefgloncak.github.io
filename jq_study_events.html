@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+var counter = 0;  
+$(document).ready(function(){
+  $("#id_span_secrete").hide();
+  $("#id_p_hover").hover(function(){
+    $(this).hide(500); //with defined time in ms
+  });
+  $("#id_p_mouseenter").mouseenter(function(){
+    $(this).hide(1000);
+  });
+  $("#id5").mouseenter(function(){
+    $("#id_span_secrete").show();
+    counter++;
+    $("#counter").text(counter);
+  });
+  $("#id_p_click").click(function(){
+    $(this).hide();
+  });
+  $("#id5").mouseleave(function(){
+    $("#id_span_secrete").hide();
+  });
+  $("#reset").click(function() {
+    $("p").show();
+    counter = 0;
+  });
+});
+</script>
+</head>
+<body>
+<p id="id_p_hover">Disappear on hover after 500 ms.</p>
+<hr />
+<p id="id_p_click">Disappear on click</p>
+<hr />
+<p id="id_p_mouseenter">Disappear on mouseenter after 1000 ms</p>
+<hr />
+<p id="id5">Display secret part <span id="id_span_secrete">SECRETE</span> on hover (<span id="counter" ></span>)</p>
+<input id="reset" type="button" name="reset" value="reset" >
+</body>
+</html>

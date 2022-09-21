@@ -1,0 +1,51 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+var isInfinitToggleEnabled = true;
+
+function fadeToogleInfinit() {
+  if (isInfinitToggleEnabled) {
+    $("div").fadeToggle(3000, fadeToogleInfinit);
+  } else {
+    $("div").stop(true, true);
+    $("div").fadeIn();
+  }
+}
+
+$(document).ready(function(){
+  $("#btn").click(function() {
+    $("div").fadeToggle(3000);
+  });
+
+  $("#btnFadeIn").click(function() {
+      $("div").fadeIn(3000);
+      console.log($("div").attr("style"));
+  });
+
+
+  $("#btnFadeOut").click(function() {
+      $("div").fadeOut(3000);
+  });
+
+  $("#btnFadeToggleInfinit").click(function() {
+    isInfinitToggleEnabled = !isInfinitToggleEnabled;
+    console.log(isInfinitToggleEnabled);
+    fadeToogleInfinit();
+  });
+
+
+
+});
+</script>
+</head>
+<body>
+    <input id="btn" type="button" name="btn" value="fadeToggle"/>
+    <input id="btnFadeIn" type="button" name="btn" value="fadeIn"/>
+    <input id="btnFadeOut" type="button" name="btn" value="fadeOut"/>
+    <input id="btnFadeToggleInfinit" type="button" name="btn" value="fadeInfinit"/>
+    <div style="display:none">Fade in|out after some time</div>
+    <div style="display:none;width:50px;height:50px;background-color:red"></div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+
+    /**
+     * Generates primes up to {@code upperBorder}.
+     */
+    function generatePrimes(upperBorder) {
+        let primeResult = "";
+        for(let i = 2; i <= upperBorder; i++) {
+            if (isPrime(i)) {
+                primeResult+=i + "\t";
+            }
+        }
+        return primeResult;
+    }
+
+    /**
+     * Evaluate whether specified value {@code primeCandidate} is prime.
+     */
+    function isPrime(primeCandidate) {
+        for (let j = 2; j <= Math.sqrt(primeCandidate); j++) {
+            if (primeCandidate % j == 0) {
+                return false;                    
+            }
+        }
+        return true;
+    }
+
+        function onLoadPrimes() {
+            document.getElementById("par").innerHTML = generatePrimes(1000);
+        }
+    </script>
+</head>
+<body onload="onLoadPrimes()">
+
+<h2>Primes to 100</h2>
+<p>My first paragraph.</p>
+
+<p id="par" ></p>
+
+
+</body>
+</html> 

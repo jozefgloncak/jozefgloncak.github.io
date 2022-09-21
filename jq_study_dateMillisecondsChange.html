@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<input id="dateBtn" type="button" >
+<p id="demo"></p>
+
+<script>
+    
+function refreshTime() {
+	const d = new Date();
+	document.getElementById("demo").innerHTML = `${d} - <br /> ${d.valueOf().toLocaleString()}`;    
+}
+
+$(document).ready(function() {
+	var isCounterRunning = true;
+    var intervalHandler
+    var handleDateBtnFunc = function() {
+    	if (isCounterRunning) {    		
+			$("#dateBtn").attr("value", "display time")
+            clearInterval(intervalHandler);
+        } else {
+        	intervalHandler = setInterval(refreshTime, 100);
+          	$("#dateBtn").attr("value", "stop display time")          	
+        }
+        isCounterRunning = !isCounterRunning;
+    }
+	$("input")
+    	.click(handleDateBtnFunc)
+        .ready(handleDateBtnFunc)
+});
+
+
+</script>
+
+<p>One day (24 hours) is 86,400,000 milliseconds.</p>
+
+</body>
+</html>
