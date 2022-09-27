@@ -8,6 +8,11 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
 * [participant_list_as_json.js](participant_list_as_json.js) - extract (JQ) from webpage pretekaj.sk list of participants and transform it to JSON.
 * [addJQueryOnFly.js](addJQueryOnFly.js) - script which add (through developer console of webrowser) JQuery library to displaied page.
 * [ageNumOfDays.js](ageNumOfDays.js) - display in console number of days from specified date until now.
+* [canvas_polygon.html](canvas_polygon.html) - after click on canvas display in the middle (at coordinates [x,y]) polygon with:
+    * defined line length
+    * defined length of inner circle
+* [canvas_circle.html](canvas_circle.html) - draw arc with 90°, 180°, 270° and 360°.
+* [canvas_flower.html](canvas_flower.html) - generate flowers on canvas.
 
 ## study code
 Contains code which was developed during study of some frontend development aspect.

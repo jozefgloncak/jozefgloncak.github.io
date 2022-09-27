@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+
+
+        
+        function drawArc(ctx, radius, x, y, color, arcSize) {
+
+            console.log("x, y, color ", x, y, color)
+            ctx.beginPath();
+            
+            ctx.moveTo(x, y);
+            ctx.arc(x, y, radius, 0, 2*Math.PI*arcSize);           
+            ctx.lineTo(x, y);
+
+            ctx.fillStyle = color
+            ctx.fill();
+            ctx.strokeStyle = "black"
+            ctx.stroke(); 
+        }
+        
+        function onLoad() {
+            var ctx = clearDrawingCtx();
+            drawArc(ctx, 20, 50, ctx.canvas.height / 2, "red", 0.25);
+            drawArc(ctx, 20, 100, ctx.canvas.height / 2, "red", 0.5);
+            drawArc(ctx, 20, 150, ctx.canvas.height / 2, "red", 0.75);
+            drawArc(ctx, 20, 200, ctx.canvas.height / 2, "red", 1);
+            ctx.beginPath();
+            ctx.arc(95, 50, 40, 0, 2 * Math.PI);
+            ctx.stroke(); 
+        }
+
+        function clearDrawingCtx() {
+            var canv = document.getElementById("canv1");
+            var ctx = canv.getContext("2d");            
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            return ctx;
+        }
+    </script>
+</head>
+<body onload="onLoad()">
+
+    <h2>Drawing on canvas flowers</h2>
+    <canvas id="canv1" width="500" height="700" style="border:1px solid #000000"/>
+
+</body>
+</html> 

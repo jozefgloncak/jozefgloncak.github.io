@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+
+        var numberOfAngles = 0;
+
+        /**
+         * Draw regular polygon with specified radius of inner circle and number of line numbers.
+         * 
+         * @polygonSize number of line in polygon (pentagon = 5, hexagon = 6....)
+         * @radius of inner circle of polygon
+         * @centerX coordinate of polygon center
+         * @centerY coordinate of polygon center
+         * 
+         */
+        function drawRegularPolygonWithRadius(ctx, polygonSize, radius, centerX, centerY) {            
+            let angleAtCircleCenter = 360/polygonSize;
+            let angleAtLine = (180-angleAtCircleCenter)/2
+            let lineLength =  2*radius/Math.tan(angleAtLine *  Math.PI/180)
+            drawRegularPolygon(ctx, polygonSize, lineLength, centerX, centerY)
+        }
+
+
+        /**
+         * Draw regular polygon with specified line length and number of line numbers.
+         * 
+         * @polygonSize number of line in polygon (pentagon = 5, hexagon = 6....)
+         * @lineLength length of polygon line in pixels
+         * @centerX coordinate of polygon center
+         * @centerY coordinate of polygon center
+         * 
+         */
+         function drawRegularPolygon(ctx, polygonSize, lineLength, centerX, centerY) {            
+            let angleAtCircleCenter = 360/polygonSize;
+            let angleAtLine = (180-angleAtCircleCenter)/2
+            let startX = centerX - lineLength/2;
+            let startY = centerY+(lineLength/2)*Math.tan(angleAtLine *  Math.PI/180);
+
+            let x = startX;
+            let y = startY;
+
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(centerX*2, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, centerY*2);
+
+            ctx.moveTo(centerX, centerY);
+
+            ctx.arc(centerX, centerY, 85, 0, Math.PI*2);
+            ctx.moveTo(x, y);
+            // var centerX = x;
+            for (var i = 0; i < polygonSize; i++) {
+            // for (var i = 0; i < 5; i++) {
+                let yDelta = lineLength * Math.sin(i*angleAtCircleCenter *  Math.PI/180);
+                let xDelta = lineLength * Math.cos(i*angleAtCircleCenter *  Math.PI/180);
+                x += xDelta;
+                y -= yDelta;
+                console.log(`uhol: ${i}, x: ${x}, y: ${y}.`)
+                ctx.lineTo(x, y);
+            }
+            // ctx.lineTo(startX, startY);
+            ctx.strokeStyle = "black"
+            ctx.stroke();
+        }
+       
+
+        function drawOnCanvas(numOfAngles) {
+            var ctx = clearDrawingCtx();
+            $("#polygonDegreeCurrent").text(numOfAngles);
+            $("#polygonDegree").text(numOfAngles+1);
+            drawRegularPolygon(ctx, numOfAngles, 50, ctx.canvas.width/2, ctx.canvas.height/2);
+            drawRegularPolygonWithRadius(ctx, numOfAngles, 200, ctx.canvas.width/2, ctx.canvas.height/2);
+        }
+
+        function clearDrawingCtx() {
+            var canv = document.getElementById("canv1");
+            var ctx = canv.getContext("2d");            
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            console.log("after clear canvas ", ctx.canvas.width, ctx.canvas.height);
+            return ctx;
+        }
+        
+    </script>
+</head>
+<body onload="onLoad()">
+    <h2>Current polygon degree is <span id="polygonDegreeCurrent">N/A</span></h2>
+    <h2>Click to canvas to draw polygon of degree <span id="polygonDegree">3</span></h2>
+    <canvas id="canv1" width="500" height="700" style="border:1px solid #000000" onclick="drawOnCanvas(numberOfAngles++ % 20 + 3)"/>
+
+</body>
+</html> 
