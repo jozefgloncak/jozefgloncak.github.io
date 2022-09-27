@@ -14,6 +14,8 @@
             let petalDistances = 14;
 			let petalRadiusSize = 10
 			//5 petals around center
+            //1. petal is exactly on right moved by 'petalDistances', next are drawen around
+            //every 72° against clock hands movement
             for (var i = 0; i <= 4	; i++) {
                 let yDelta = petalDistances * Math.sin(i*72 *  Math.PI/180);
                 let xDelta = petalDistances * Math.cos(i*72 *  Math.PI/180);

@@ -13,6 +13,7 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
     * defined length of inner circle
 * [canvas_circle.html](canvas_circle.html) - draw arc with 90°, 180°, 270° and 360°.
 * [canvas_flower.html](canvas_flower.html) - generate flowers on canvas.
+* [canvas_clock.html](canvas_clock.html) - clock (only second hand)
 
 ## study code
 Contains code which was developed during study of some frontend development aspect.
