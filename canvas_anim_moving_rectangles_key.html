@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+
+</head>
+<body onload="startGame()"  style="margin:0">
+    <canvas id="canv" height="500" width="600" ></canvas>
+
+    <p>
+
+    </p>
+    <script>
+
+        var myGame;
+
+        function Game(ctx) {
+            this.start = function() {
+                console.log('start game');
+                setInterval(updateCanvas, 100);
+            }
+            this.squares = [];
+            this.ctx = ctx;
+
+            this.isKeyUpPressed = false;
+            this.isKeyDownPressed = false;
+            this.isKeyLeftPressed = false;
+            this.isKeyRightPressed = false;
+
+            this.resetArrowKeyStatuses = function(keyCode, newState) {
+                if (keyCode == 37) {
+                    this.isKeyLeftPressed = newState;
+                } else if (keyCode == 39) {
+                    this.isKeyRightPressed = newState;
+                } else if (keyCode == 38) {
+                    this.isKeyUpPressed = newState;
+                } else if (keyCode == 40) {
+                    this.isKeyDownPressed = newState;
+                }
+            }
+
+        }
+
+        window.addEventListener("keydown", function(event) {
+            console.log("keydown pressed ", event.keyCode);
+            myGame.resetArrowKeyStatuses(event.keyCode, true);
+            console.log(`right, left, down, up: ${myGame.isKeyRightPressed}, ${myGame.isKeyLeftPressed}, ${myGame.isKeyDownPressed}, ${myGame.isKeyUpPressed}`);
+        });
+        
+        window.addEventListener("keyup", function(event) {
+            console.log("keyup pressed ", event.keyCode);
+            myGame.resetArrowKeyStatuses(event.keyCode, false);
+        });
+
+        function updateCanvas() {
+            myGame.ctx.clearRect(0, 0, myGame.ctx.canvas.width, myGame.ctx.canvas.height);
+            myGame.squares.forEach(el => {
+                el.update();
+            });
+        }
+
+    
+        function startGame() {
+            //create instance of game class
+            
+            myGame = new Game(document.getElementById("canv").getContext("2d"));
+            let squares = [
+                new Square(Math.random()*myGame.ctx.canvas.width, Math.random()*myGame.ctx.canvas.height, 15, 15, "blue", 1, myGame),
+                new Square(Math.random()*myGame.ctx.canvas.width, Math.random()*myGame.ctx.canvas.height, 15, 15, "red", 2, myGame)
+            ];
+
+            myGame.squares = squares;
+            myGame.start();
+        }
+    
+        function Square(x, y, width, height, color, delta, game) {
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.update = function() {
+                if (game.isKeyRightPressed) {
+                    this.x += delta;
+                }
+                if (game.isKeyLeftPressed) {
+                    this.x -= delta;
+                }
+                if (game.isKeyDownPressed) {
+                    this.y += delta
+                }
+                if (game.isKeyUpPressed) {
+                    this.y -= delta
+                }
+                this.x = this.x < 0 ? game.ctx.canvas.width : this.x;
+                this.y = this.y < 0 ? game.ctx.canvas.height : this.y;
+                game.ctx.fillStyle = color;
+                game.ctx.strokeStyle = "black";
+                game.ctx.fillRect(Math.floor(this.x) % game.ctx.canvas.width, 
+                this.y % game.ctx.canvas.height, width, height);
+                game.ctx.stroke();
+            }
+        }
+
+    </script>
+</body>
+</html>
+

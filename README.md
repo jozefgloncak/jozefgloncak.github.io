@@ -15,6 +15,7 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
 * [canvas_flower.html](canvas_flower.html) - generate flowers on canvas.
 * [canvas_clock.html](canvas_clock.html) - clock (only second hand)
 * [canvas_anim_moving_rectangles.html](canvas_anim_moving_rectangles.html) - movement of squares through canvas. Various speed. Possible change direction of movement. Read cursor coordinates on click.
+* [canvas_anim_moving_rectangles_key.html](canvas_anim_moving_rectangles_key.html) - movement of squares through canvas. Squares are moved on arrow keys press event.
 
 ## study code
 Contains code which was developed during study of some frontend development aspect.
