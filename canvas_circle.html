@@ -29,6 +29,14 @@
             ctx.beginPath();
             ctx.arc(95, 50, 40, 0, 2 * Math.PI);
             ctx.stroke(); 
+            ctx.beginPath();
+            ctx.fillStyle = "yellow";
+            ctx.arc(95, 150, 40, 0, Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke(); 
+
+
         }
 
         function clearDrawingCtx() {

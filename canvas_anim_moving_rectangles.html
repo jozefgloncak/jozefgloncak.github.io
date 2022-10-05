@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+
+</head>
+<body onload="startGame()"  style="margin:0">
+    <canvas id="canv" height="500" width="600" onclick="handleCanvasClick(event)"></canvas>
+
+    <p>
+        Click to left 10% of rectangle width => objects move to LEFT.<br />
+        Click to right 10% of rectangle width => objects move to RIGHT.<br />
+        Click to up 10% of rectangle height => objects move to UP.<br />
+        Click to down 10% of rectangle height => objects move to DOWN.<br />
+        Click elsewhere => stop animation.
+    </p>
+    <script>
+
+        var myGame;
+
+        function Game(ctx) {
+            this.start = function() {
+                console.log('start game');
+                setInterval(updateCanvas, 100);
+            }
+            this.squares = [];
+            this.ctx = ctx;
+            this.direction = "RIGHT";
+
+        }
+
+
+        function updateCanvas() {
+            myGame.ctx.clearRect(0, 0, myGame.ctx.canvas.width, myGame.ctx.canvas.height);
+            myGame.squares.forEach(el => {
+                el.update();
+            });
+        }
+
+    
+        function startGame() {
+            //create instance of game class
+            
+            myGame = new Game(document.getElementById("canv").getContext("2d"));
+            let squares = [
+                    new Square(10, 10, 15, 15, "blue", 1, myGame)
+                    ,new Square(10, 40, 15, 15, "green", 2, myGame)
+                    ,new Square(10, 70, 15, 15, "red", 1.5, myGame)
+                    ,new Square(10, 100, 15, 15, "red", 3, myGame)
+                    ,new Square(10, 130, 15, 15, "red", 1, myGame)
+                    ,new Square(10, 160, 15, 15, "purple", 2, myGame)
+                ];
+            myGame.squares = squares;
+            myGame.start();
+        }
+    
+        function Square(x, y, width, height, color, delta, game) {
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.update = function() {
+                if (game.direction == "RIGHT") {
+                    this.x += delta;
+                }
+                if (game.direction == "LEFT") {
+                    this.x -= delta;
+                }
+                if (game.direction == "DOWN") {
+                    this.y += delta
+                }
+                if (game.direction == "UP") {
+                    this.y -= delta
+                }
+                this.x = this.x < 0 ? myGame.ctx.canvas.width : this.x;
+                this.y = this.y < 0 ? myGame.ctx.canvas.height : this.y;
+                myGame.ctx.fillStyle = color;
+                myGame.ctx.strokeStyle = "black";
+                myGame.ctx.fillRect(Math.floor(this.x) % myGame.ctx.canvas.width, 
+                this.y % myGame.ctx.canvas.height, width, height);
+                myGame.ctx.stroke();
+            }
+        }
+
+        function handleCanvasClick(e) {
+            if (e.layerX <= document.getElementById("canv").width * 0.1) {
+                myGame.direction = "LEFT";
+            } else if (e.layerX >= document.getElementById("canv").width * 0.9) {
+                myGame.direction = "RIGHT";
+            } else if (e.layerY >= document.getElementById("canv").height * 0.9) {
+                myGame.direction = "DOWN";
+            } else if (e.layerY <= document.getElementById("canv").height * 0.1) {
+                myGame.direction = "UP";
+            } else {
+                myGame.direction = "NOMOVEMENT"
+            }
+            console.log(`canvas clicked: x: ${e.layerX}, y: ${e.layerY}`);
+
+        }
+    
+    </script>
+</body>
+</html>
+
