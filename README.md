@@ -16,6 +16,7 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
 * [canvas_clock.html](canvas_clock.html) - clock (only second hand)
 * [canvas_anim_moving_rectangles.html](canvas_anim_moving_rectangles.html) - movement of squares through canvas. Various speed. Possible change direction of movement. Read cursor coordinates on click.
 * [canvas_anim_moving_rectangles_key.html](canvas_anim_moving_rectangles_key.html) - movement of squares through canvas. Squares are moved on arrow keys press event.
+* [canvas_anim_game.html](canvas_anim_game.html) - simple game. square has to be traversed through gaps in vertical obstacles. Code contains classes, class inheritance. Handling key arrow press and release, animation
 
 ## study code
 Contains code which was developed during study of some frontend development aspect.
