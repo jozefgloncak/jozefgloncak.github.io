@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+
+</head>
+<body onload="startGame()"  style="margin:0">
+    <canvas id="canv" height="500" width="400" ></canvas>
+
+
+    <p>
+        Time: <span id="timer"></span>
+    </p>
+    <script>
+        var myGame;
+
+        class Game {
+            
+            intervalHandler;
+
+            gapMin = 100; //minimal size of gap
+            gapMax = 150; //maximal size of gap
+
+            isKeyUpPressed = false;
+            isKeyDownPressed = false;
+            isKeyLeftPressed = false;
+            isKeyRightPressed = false;
+
+            currentframeNum = 100;
+            squares = [];
+            lastClickX; //last click position X
+            lastClickY; //last click position X
+            timer;
+            startTime;
+
+
+            constructor(ctx) {
+                this.ctx = ctx;
+            }
+
+            start() {
+                console.log('start game');
+                this.intervalHandler = setInterval(updateTimer, 100);
+                this.generateSquares(6, 6);
+                this.startTime = new Date();
+            }
+
+            stop() {
+                clearInterval(this.intervalHandler);
+            }
+
+            //generate evenly gridSizeX * gridSizeY squares in grid
+            //size of square is max 40 % of smaller squareArea size
+            generateSquares(gridSizeX, gridSizeY) {
+                let squareAreaWidth = this.ctx.canvas.width / gridSizeX;
+                let squareAreaHeight = this.ctx.canvas.height / gridSizeY
+                let percentage = 0.4;
+                let squareSize = Math.min(squareAreaWidth, squareAreaHeight) * percentage;
+
+                let maxSquareAreaHorizontalOffset = squareAreaWidth - squareSize - 1; //-1 to set marginal area at position +1
+                let maxSquareAreaVerticalOffset = squareAreaHeight - squareSize -1;
+
+
+                for (let i = 0; i < gridSizeX; i++) {
+                    for (let j = 0; j < gridSizeY; j++) {
+                        let x = i*squareAreaWidth + Math.random()*maxSquareAreaHorizontalOffset + 1;
+                        let y = j*squareAreaHeight + Math.random()*maxSquareAreaVerticalOffset + 1
+                        let square = new Square(x, y, squareSize, squareSize, "blue", 0 , this);
+                        square.update();
+                        this.squares.push(square);
+                    }
+                }
+
+            }
+
+            updateCanvas() {
+                //clear canvas
+                this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+                //click is like square with side of length 1 pixel
+                this.squares = this.squares.filter(square => !square.isOverlappingWithCoordinates(this.lastClickX, this.lastClickY, 0, 0));
+                if (this.squares.length == 0) {
+                    this.stop();
+                } else {
+                    this.squares.forEach(square => square.update());
+                }
+
+            }
+
+            setLastClick(x, y) {
+                this.lastClickX = x;
+                this.lastClickY = y;
+            }
+
+        }
+
+        function updateTimer() {
+            console.log('updateTimer');
+            if (!myGame.timer) {
+                myGame.timer = document.getElementById("timer");
+            }
+            let currentTime = new Date();
+            currentLength = currentTime - myGame.startTime;
+            let seconds = Math.floor(currentLength / 1000)
+            myGame.timer.innerText = `${seconds}:${currentLength - seconds*1000} s`;
+        }
+
+
+        function updateCanvas() {
+            myGame.updateCanvas();
+            
+        }
+
+        function startGame() {
+            document.getElementById("canv").addEventListener("click", function(event) {
+                console.log("clicked ", event);
+                myGame.setLastClick(event.layerX, event.layerY);
+                myGame.updateCanvas();
+            });
+        
+
+
+            //create instance of game class
+            myGame = new Game(document.getElementById("canv").getContext("2d"));
+            myGame.start();
+        }
+    
+        class Component {
+            constructor(x, y, width, height, color, delta, game) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.color = color;
+                this.delta = delta;
+                this.game = game;
+            }
+ 
+            updateInner(ctx) {
+            }
+
+            update() {
+                let ctx = this.game.ctx;
+
+                this.updateInner(ctx);
+
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = "black";
+                ctx.fillRect(Math.floor(this.x) % ctx.canvas.width, this.y % ctx.canvas.height, this.width, this.height);
+                ctx.stroke();
+            }
+
+            isOverlappingWithCoordinates(otherX, otherY, otherWidth, otherHeight) {
+                let otherLeft = otherX;
+                let otherRight = otherX + otherWidth;
+                let otherTop = otherY;
+                let otherBottom = otherY + otherHeight;
+                let thisLeft = this.x;
+                let thisRight = this.x + this.width;
+                let thisTop = this.y;
+                let thisBottom = this.y + this.height;
+
+                if (thisLeft > otherRight || thisRight < otherLeft ||
+                    thisBottom < otherTop || thisTop > otherBottom ) {
+                        return false;
+                }
+                return true;
+            }
+
+            isOverlapping(otherComponent) {
+                return this.isOverlappingWithCoordinates(otherComponent.x, otherComponent.y, otherComponent.width, otherComponent.height)
+            }
+        }
+
+        class Square extends Component {
+            constructor(x, y, width, height, color, delta, game) {
+                super(x, y, width, height, color, delta, game);
+            }
+
+            updateInner(ctx) {
+            }
+        }
+
+    </script>
+</body>
+</html>
+
