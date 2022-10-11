@@ -18,6 +18,7 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
 * [canvas_anim_moving_rectangles_key.html](canvas_anim_moving_rectangles_key.html) - movement of squares through canvas. Squares are moved on arrow keys press event.
 * [canvas_game_avoid_obstacles.html](canvas_game_avoid_obstacles.html) - simple game. square has to be traversed through gaps in vertical obstacles. Code contains classes, class inheritance. Handling key arrow press and release, animation
 * [canvas_game_click_squares.html](canvas_game_click_squares.html) - click all squares until all disappear. Below canvas is simple timer which track length of game.
+* [tone_generator.html](tone_generator.html) - generates some basic tones after press key on keyboard (press of 'c' key => generate c4 tone).
 
 ## study code
 Contains code which was developed during study of some frontend development aspect.

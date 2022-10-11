@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+<!-- https://marcgg.com/blog/2016/11/01/javascript-audio/ -->
+<script>
+    
+    var context = new AudioContext()
+
+    var mySound = {};
+    var tonesBasic = {
+        "c4": 261.6,
+        "d4": 293.7,
+        "e4": 329.6,
+        "f4": 349.2,
+        "g4": 392.0,
+        "a4": 440.0,
+        "h4": 493.9,
+        "c5": 523.3,
+        "d5": 587.3,
+        "e5": 659.3,
+        "f5": 698.5
+    };
+
+    function playMusic(event) {  
+        console.log(event);      
+        switch (event.key.toLowerCase()) {
+            case "c": 
+            case "d": 
+            case "e": 
+            case "f": 
+            case "g": 
+            case "a": 
+            case "h": handleToneSelection(event); break;
+            default: console.log("unsupported tone"); break;
+        }
+    }
+    
+    function handleToneSelection(event) {
+        let tone = keyToTone(event);
+
+        if (!mySound[tone]) {
+            mySound[tone] = generateTone(tone);
+        }
+
+    }
+
+    function generateTone(tone) {
+        var o = context.createOscillator()
+        o.type = "sine"
+        o.connect(context.destination)
+        o.frequency.value = tonesBasic[tone];
+        o.start();
+        return o;
+    }
+
+    /**
+     * Prevedie stlacenu klavesnicu na ton
+     * c, d, e, f, g, a, h => c4, d4, e4, f4, g4, a4, h4
+     * c+SHIFT => c5
+     * 
+     */ 
+    function keyToTone(event) {
+        let key = event.key;
+        let tone;
+        if (key == key.toUpperCase()) {
+            tone = key.toLowerCase() + "5";
+        } else {
+            tone = key.toLowerCase() + "4";
+        }
+        console.log(tone);
+        return tone;
+    }
+
+    /**
+     * Whatever key release cause stop of all playing tones
+     */
+    function stopMusic(event) {
+        for (let obj of Object.entries(mySound)) {
+            obj[1].stop();
+        }
+        mySound = {};
+
+    }
+
+    // function stopMusic(event) {
+    //     console.log(event);
+    //     for (let obj of Object.entries(mySound)) {
+    //         obj[1].pause();
+    //     }
+    //     mySound = {};
+    // }
+
+    // function shutDownTone(tone) {
+    //     if (mySound[tone]) {
+    //         mySound[tone].pause();
+    //         delete mySound[tone];
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+        // function handleToneSelection(event) {
+    //     let tone = keyToTone(event);
+
+    //     if (!mySound[tone]) {
+    //         let musicFile = tone + ".mp3";
+    //         console.log('new sound ', musicFile);
+    //         mySound[tone] = new Audio("tones/" + musicFile);
+    //         mySound[tone].play();
+    //     }
+    //     console.log(mySound);
+    // }
+
+
+</script>
+</head>
+<body onkeydown="playMusic(event)" onkeyup="stopMusic(event)"  style="margin:0">
+    <!-- <input value="btn" name="btn" ></button> -->
+
+</body>
+</html>
+
