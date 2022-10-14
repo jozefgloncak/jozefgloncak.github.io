@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+
+</head>
+<body onload="start()"  style="margin:0">
+    <canvas id="canv" height="500" width="700" onclick="handleCanvasClick(event)"></canvas>
+    <script>
+
+        //array of numbers to 100
+        var numbers = [];
+        var highestNumber = 100;
+        var intervalHandler;
+        var ctx = document.getElementById("canv").getContext("2d");
+        var upperBorderSize = 10;
+        var bottomBorderSize = 20;
+        var leftBorderSize = 10;
+        var rectangleWidth = 30;
+        var startY = ctx.canvas.height - bottomBorderSize;
+        var usableHeight = ctx.canvas.height - bottomBorderSize - upperBorderSize;
+
+        var isSwitchPhase = true;
+        var idxI = numbers.length-1;
+        var idxJ = 0;
+        var stepMode = false;
+
+        var defaultMsInterval = 500;
+
+        function start() {
+            for (let i = 0; i<20; i++) {
+                numbers.push(Math.floor((Math.random()*highestNumber)));
+            }
+            console.log(numbers);
+            runInInterval(defaultMsInterval);
+            idxI = numbers.length-1;
+            idxJ = 0;
+
+        }
+
+        function redraw() {
+            
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            for (let i = 0; i < numbers.length; i++) {
+                let height = usableHeight * numbers[i]/highestNumber;
+                let color = "red";
+                if (i == idxJ || i == idxJ+1) {
+                    color = "pink";
+                }
+                drawRectangle(leftBorderSize + i*rectangleWidth, startY, rectangleWidth, -height, numbers[i], color);
+            }
+
+            if (isSwitchPhase) {
+                _sort_SwitchIfRequired()
+            } else if (!_sort_ContinueToNextCouple()) {
+                stopRunningInterval();
+            }
+            isSwitchPhase = !isSwitchPhase;
+        }
+
+        /**
+         * Buble sort comparing part. 
+         * 
+         * Compare elements which are neighbour and bigger is moved to higher index
+         */ 
+        function _sort_SwitchIfRequired() {
+            if (numbers[idxJ] > numbers[idxJ+1]) {
+                let temp = numbers[idxJ];
+                numbers[idxJ] = numbers[idxJ+1]
+                numbers[idxJ+1] = temp;
+            }
+        }
+
+        /**
+         * Bubble sort moving part.
+         * 
+         * Move to other couple of elements. idxI represents lowest index of sorted part (to the end).
+         * If it is still possible to move to higher couple which is below idxI then to it.
+         * Else if idxI is point to element which has at least 2 elements at lower 
+         * position enlarge sorted part (idx--) and start couple comparing from begining.
+         * 
+         * If nothing from previous is possible then it is end of sorting.
+         */ 
+        function _sort_ContinueToNextCouple() {
+            if (idxI > idxJ + 1 ) {
+                idxJ++;
+                return true;
+            } else if (idxI > 1) {
+                idxI--;
+                idxJ = 0;
+                return true;
+            }
+            return false;
+        }
+
+
+        /**
+         * Draw rectangle with border and with number value below
+         */
+        function drawRectangle(x, y, width, height, numVal, color) {
+            // console.log(height);
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height); //inside color
+            ctx.rect(x, y, width, height) //border
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+            ctx.fillStyle = "black";
+            ctx.fillText(numVal, x, y  + 10);
+        }
+
+        function onClickStepMode() {
+            stepMode = !stepMode;
+            
+            let el = document.getElementById("idNextStepBtn");
+            let btnStepModeEl = document.getElementById("idStepModeBtn");
+            let speedInputEl = document.getElementById("idSpeedInput");
+            if (stepMode) {
+                stopRunningInterval();
+                el.removeAttribute("disabled");
+                btnStepModeEl.setAttribute("value", "Automatic mode");
+                speedInputEl.setAttribute("disabled", "true");
+            } else {
+                el.setAttribute("disabled", "true");
+                btnStepModeEl.setAttribute("value", "Step mode");
+                runInInterval(defaultMsInterval);
+                speedInputEl.removeAttribute("disabled");
+            }
+        }
+
+        function onClickNextStep() {
+            redraw();
+        }
+
+        function onBlurSpeed(event) {
+            console.log("onBlurSpeed ", event.originalTarget.value);
+            let frequencyInMs = event.originalTarget.value;
+            if (frequencyInMs && !isNaN(frequencyInMs)) {
+                stopRunningInterval();
+                runInInterval(frequencyInMs);
+            }
+        }
+
+        function runInInterval(msInterval) {
+            intervalHandler = setInterval(redraw, msInterval);
+        }
+
+        function stopRunningInterval() {
+            if (intervalHandler) {
+                clearInterval(intervalHandler);
+                intervalHandler = undefined;
+            }
+        }
+        
+        </script>
+        <br />
+        <input id="idStepModeBtn" type="button" value="Step mode" onclick="onClickStepMode()" title="Next step of sorting will be displayed only after click on Next step button."/>
+        <input id="idNextStepBtn" type="button" value="Next step" disabled="true" onclick="onClickNextStep()" />
+        <input id="idSpeedInput" type="text" onblur="onBlurSpeed(event)"/>
+</body>
+</html>
+
