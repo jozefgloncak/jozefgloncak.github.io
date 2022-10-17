@@ -10,32 +10,46 @@ canvas {
 </style>
 
 </head>
-<body onload="startGame()"  style="margin:0">
-    <canvas id="canv" height="500" width="400" ></canvas>
+<body onload="initWindow()"   style="margin:0">
+    <canvas id="canv" ondblclick="createGame()" onclick="pausePlayGame(event)" onkeydown="canvKeydown(event)" onkeyup="canvKeyup(event)" height="300" width="400" ></canvas>
 
-    <p>
-
-    </p>
     <script>
 
         var myGame;
 
         function Game(ctx) {
+            this.isPaused = true;
+            this.isStopped = true;;
             this.start = function() {
                 console.log('start game');
                 this.intervalHandler = setInterval(updateCanvas, 10);
+                this.isPaused = false;
+                this.isStopped = false;
+                this.startTime = new Date();
             }
 
             this.stop = function() {
                 clearInterval(this.intervalHandler);
+                this.isStopped = true;
+            }
+
+            this.pause = function() {
+                clearInterval(this.intervalHandler);
+                this.isPaused = true;
+            }
+
+            this.pauseUnpause = function() {
+                if (!this.isStopped) {
+                    this.isPaused ? this.start() : this.pause();
+                }
             }
 
             this.intervalHandler;
             this.square;
             this.obstacles = [];
             this.ctx = ctx;
-            this.gapMin = 100; //minimal size of gap
-            this.gapMax = 150; //maximal size of gap
+            this.gapMin = ctx.canvas.height * 0.2; //minimal size of gap
+            this.gapMax = ctx.canvas.height * 0.3; //maximal size of gap
 
             this.isKeyUpPressed = false;
             this.isKeyDownPressed = false;
@@ -43,6 +57,11 @@ canvas {
             this.isKeyRightPressed = false;
 
             this.frameNum = 100;
+
+            this.gapMovementSpeed = 0;
+            this.obstacleFrequency = 150;
+            this.obstacleColor = "green"
+
 
             this.resetArrowKeyStatuses = function(keyCode, newState) {
                 if (keyCode == 37) {
@@ -57,20 +76,10 @@ canvas {
             }
 
             this.generateObstacle = function() {
-            //generate new obstacle every 150 frame. obstacle consists of vertical bar which has gap somewhere.
+            //generate new obstacle every >obstacleFrequency< frame. obstacle consists of vertical bar which has gap somewhere.
             //gap length is random from interval <minGap;maxGap>
-                if (this.frameNum % 150 == 0) {
-                    //genare gap length
-                    let gap = this.gapMin + Math.random()*(this.gapMax - this.gapMin);
-
-                    //generate upDown obstacle height. min remaining gap is > 3*square height
-                    let upDownObstacleLength = Math.random() * (this.ctx.canvas.height - 3 * myGame.square.height);
-
-                    this.obstacles.push(new Obstacle(this.ctx.canvas.width-1, 0, 10, upDownObstacleLength, "green", 1, this ));
-                    if (upDownObstacleLength + gap < this.ctx.canvas.height) {
-                        downUpObstacleLength = this.ctx.canvas.height - (upDownObstacleLength + gap);
-                        this.obstacles.push(new Obstacle(this.ctx.canvas.width-1, upDownObstacleLength + gap, 10, downUpObstacleLength, "green", 1, this ));
-                    }
+                if (this.frameNum % this.obstacleFrequency == 0) {
+                    this.obstacles.push(new VerticalObstacle(10, this.obstacleColor, this.gapMovementSpeed, this));
                 }                
             }
 
@@ -93,7 +102,7 @@ canvas {
                 this.frameNum++;
 
                 //remove obstacles which are out of cavnas
-                this.obstacles = this.obstacles.filter(el => el.isInCanvas);
+                this.obstacles = this.obstacles.filter(el => el.bottomObstacle.isInCanvas && el.topObstacle.isInCanvas);
 
                 //create new obstacles
                 this.generateObstacle();
@@ -108,30 +117,75 @@ canvas {
         }
 
         function updateCanvas() {
-            myGame.updateCanvas();
+            if (myGame) {
+                myGame.updateCanvas();
+                timerElement = document.getElementById("timer");
+                timerElement.innerText = Math.floor(myGame.frameNum / 100);
+            }
+        }
+
+        function canvKeyup(event) {
+            console.log("keyup pressed ", event.keyCode);
+            if (myGame) {
+                myGame.resetArrowKeyStatuses(event.keyCode, false);
+            }
+            
+        }
+
+        function canvKeydown(event) {
+            console.log("keydown pressed ", event.keyCode);
+            if (myGame) {
+                myGame.resetArrowKeyStatuses(event.keyCode, true);
+                if (event.keyCode == 32) {
+                    myGame.pauseUnpause();
+                } else {
+                    console.log(`right, left, down, up: ${myGame.isKeyRightPressed}, ${myGame.isKeyLeftPressed}, ${myGame.isKeyDownPressed}, ${myGame.isKeyUpPressed}`);
+                }
+                
+            }
+
         }
 
         function startGame() {
 
-            window.addEventListener("keydown", function(event) {
-                console.log("keydown pressed ", event.keyCode);
-                myGame.resetArrowKeyStatuses(event.keyCode, true);
-                console.log(`right, left, down, up: ${myGame.isKeyRightPressed}, ${myGame.isKeyLeftPressed}, ${myGame.isKeyDownPressed}, ${myGame.isKeyUpPressed}`);
-            });
+            // window.addEventListener("keydown", function(event) {
+            //     console.log("keydown pressed ", event.keyCode);
+            //     myGame.resetArrowKeyStatuses(event.keyCode, true);
+            //     console.log(`right, left, down, up: ${myGame.isKeyRightPressed}, ${myGame.isKeyLeftPressed}, ${myGame.isKeyDownPressed}, ${myGame.isKeyUpPressed}`);
+            // });
         
-            window.addEventListener("keyup", function(event) {
-                console.log("keyup pressed ", event.keyCode);
-                myGame.resetArrowKeyStatuses(event.keyCode, false);
-            });
+            // window.addEventListener("keyup", function(event) {
+            //     console.log("keyup pressed ", event.keyCode);
+            //     myGame.resetArrowKeyStatuses(event.keyCode, false);
+            // });
 
             //create instance of game class
             myGame = new Game(document.getElementById("canv").getContext("2d"));
+            adjustGapMovementSpeed();
+            adjustObstacleFrequency();
+            adjustObstacleColor();
+
             let sqr = new Square(10, myGame.ctx.canvas.height/2, 15, 15, "blue", 3, myGame);
 
             myGame.square = sqr;
             myGame.start();
         }
     
+        function createGame() {
+            if (myGame) {
+                myGame.stop();
+            }
+            startGame();
+        }
+
+        function pausePlayGame(event) {
+            console.log(event);
+            if (myGame) {
+                myGame.pauseUnpause();
+            }
+
+        }
+
         class Component {
             constructor(x, y, width, height, color, delta, game) {
                 this.x = x;
@@ -150,10 +204,11 @@ canvas {
                 let ctx = this.game.ctx;
 
                 this.updateInner(ctx);
-
+                ctx.beginPath();
                 ctx.fillStyle = this.color;
                 ctx.strokeStyle = "black";
                 ctx.fillRect(Math.floor(this.x) % ctx.canvas.width, this.y % ctx.canvas.height, this.width, this.height);
+                ctx.rect(Math.floor(this.x) % ctx.canvas.width, this.y % ctx.canvas.height, this.width, this.height);
                 ctx.stroke();
             }
 
@@ -201,14 +256,108 @@ canvas {
             isInCanvas = true;
 
             updateInner(ctx) {
-                if (this.x < 0 || this.x > ctx.canvas.width || this.y < 0 || this.y > ctx.canvas.height) {
+
+                if (this.x < 0 || this.x > ctx.canvas.width ) {  //|| this.y < 0 || this.y > ctx.canvas.height
                     this.isInCanvas = false;
                 }
                 this.x -= this.delta
+
             }
         }
 
-    </script>
+        /**
+         * Models vertical obstacle (rectangle from top border + gap + rectangle from bottom border)
+         */ 
+        class VerticalObstacle {
+            topObstacle
+            bottomObstacle
+            gap; //gap between top and bottom obstacle
+            ctx;
+            constructor(width, color, gapMovementDelta, game) {                
+                this.width = width;
+                this.color = color;
+                this.game = game;
+                this.gapMovementDelta = gapMovementDelta; //how many pixels will be added (substracted) on each new frame from gap position
+                this.ctx = game.ctx;
+                this.init();
+            }
+
+            init() {
+                //generate gap length
+                this.gap = this.game.gapMin + Math.random()*(this.game.gapMax - this.game.gapMin);
+
+                //topObstacle - in marginal case gap length + upObstacle can create whole horizontal obstacle
+                let topObstacleLength = Math.random() * (this.ctx.canvas.height - this.gap);
+                this.topObstacle = new Obstacle(this.ctx.canvas.width-1, 0, 10, topObstacleLength, this.color, 1, this );
+                
+                //bottomObstacle - in marginal case (if height of up obstacle is 0) can bottomObstacle create vhole horizontal obstacle
+                let bottomObstacleLength = this.ctx.canvas.height - (topObstacleLength + this.gap);
+                this.bottomObstacle = new Obstacle(this.ctx.canvas.width-1, topObstacleLength + this.gap, 10, bottomObstacleLength, this.color, 1, this);
+            }
+
+            update() {
+                //if height of obstacle is lower that 0 then gap is at bottom or at top. direction of movement of gap will be changed.
+                if (this.topObstacle.height < 0 || this.bottomObstacle.height < 0 ) {
+                    this.gapMovementDelta = this.gapMovementDelta * (-1);
+                }
+                this.topObstacle.height += this.gapMovementDelta;
+                this.bottomObstacle.y += this.gapMovementDelta;
+                this.bottomObstacle.height -= this.gapMovementDelta;
+
+                this.topObstacle.update();
+                this.bottomObstacle.update();
+            }
+
+            /**
+             * Horizontal obstacle is crashed if one of its part is crashed.
+             */        
+            isCrashed(otherComponent) {
+                return this.topObstacle.isCrashed(otherComponent) || this.bottomObstacle.isCrashed(otherComponent);
+            }
+
+        }
+
+        function adjustGapMovementSpeed(event) {
+            if (myGame) {
+                let val = document.getElementById("inputGapSpeed").value;
+                if (val) {
+                    myGame.gapMovementSpeed = val / 10;
+                    console.log('set obstacle gap movenent to ', val, ' pixels on each new frame.');
+                }
+            }
+        }
+
+        function adjustObstacleFrequency(event) {
+            if (myGame) {
+                let val = document.getElementById("inputObstacleFrequency").value;
+                myGame.obstacleFrequency = val;
+                console.log('set obstacles frequency to ', val);
+            }
+        }
+
+        function adjustObstacleColor(event) {
+            if (myGame) {
+                let val = document.getElementById("inputObstacleColor").value;
+                myGame.obstacleColor = val;
+                console.log('set obstacles color to ', val);
+            }
+        }
+
+
+        function initWindow() {
+            let canEl = document.getElementById("canv");
+            canEl.tabIndex = 1000;
+        }
+
+</script>
+    <p>
+        Score: <span id="timer"></span>
+    </p>
+    Double click canvas => start (restart) game.<br />
+    Click canvas => pause|unpause game.<br />
+    Speed of gap movent (0 - no movement, 10 highest speed): <input id="inputGapSpeed" value="2" type="number" min="0" max="10" step="1" onblur="adjustGapMovementSpeed(event)" ><br />
+    Frequency of obstacles: <input id="inputObstacleFrequency" value="150" type="number" min="100" max="300" step="10" onblur="adjustObstacleFrequency(event)" ><br />
+    Obstacle color: <input id="inputObstacleColor" value="#00aa00" type="color" onchange="adjustObstacleColor(event)" ><br />
 </body>
 </html>
 
