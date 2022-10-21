@@ -26,22 +26,78 @@ canvas {
         var startY = ctx.canvas.height - bottomBorderSize;
         var usableHeight = ctx.canvas.height - bottomBorderSize - upperBorderSize;
 
-        var isSwitchPhase = true;
+        var changeIndexes = false;
         var idxI = numbers.length-1;
         var idxJ = 0;
+        var idxA;
         var stepMode = false;
 
         var defaultMsInterval = 500;
 
+        var selectedAlgorithm = 2;
+
+        /**
+         * Changes which has to be reverted. The same algorithm is used for changing in indexes and also for switching values.
+         * Array is printed also after switch value and also after changing indexes. TO avoid incorrect interpretation (
+         * couple which was switched, then array printed is in next step compared incorrecty (because of previous switch))
+         */ 
+        var changesToRevert = []; 
+
+        var sortAlgorithms = [
+            {
+                name: "Buble sort",
+                sort: _bubleSort,
+                iInit: function(arr) {
+                    return arr.length -1;
+                },
+                jInit: function(arr) {
+                    return 0;
+                },
+                idxToHighlight: function() { //which indexes shoult be highlighted
+                    return [idxJ, idxJ+1];
+                }
+            },
+            {
+                name: "Insert sort",
+                sort: _insertSort,
+                iInit: function(arr) {
+                    return 1;
+                },
+                jInit: function(arr) {
+                    return 0;
+                },
+                idxToHighlight: function() {
+                    return [idxJ, idxJ+1];
+                }
+            },
+            {
+                name: "Select sort",
+                sort: _selectSort,
+                iInit: function(arr) {
+                    return 0;
+                },
+                jInit: function(arr) {
+                    return 1;
+                },
+                aInit: 0, //index to first element of unordered part which is marked as minimum at algorithm start
+                idxToHighlight: function() {
+                    return [idxJ, idxA];
+                }
+            }
+        ]
+
         function start() {
+            numbers = [];
             for (let i = 0; i<20; i++) {
                 numbers.push(Math.floor((Math.random()*highestNumber)));
             }
             console.log(numbers);
-            runInInterval(defaultMsInterval);
-            idxI = numbers.length-1;
-            idxJ = 0;
+            
+            idxI = sortAlgorithms[selectedAlgorithm].iInit(numbers);
+            idxJ = sortAlgorithms[selectedAlgorithm].jInit(numbers);
+            idxA = sortAlgorithms[selectedAlgorithm].aInit;
 
+            runInInterval(defaultMsInterval);
         }
 
         function redraw() {
@@ -51,31 +107,24 @@ canvas {
             for (let i = 0; i < numbers.length; i++) {
                 let height = usableHeight * numbers[i]/highestNumber;
                 let color = "red";
-                if (i == idxJ || i == idxJ+1) {
+                if (_shoulHighlight(i)) {
                     color = "pink";
                 }
                 drawRectangle(leftBorderSize + i*rectangleWidth, startY, rectangleWidth, -height, numbers[i], color);
             }
 
-            if (isSwitchPhase) {
-                _sort_SwitchIfRequired()
-            } else if (!_sort_ContinueToNextCouple()) {
+            if (changesToRevert.length > 0) { //if in previous step there were made changes revert it to ensure that all code branches will execute correctly.
+                _switchNumbers(numbers, changesToRevert[0], changesToRevert[1]);
+                changesToRevert = [];
+            }
+            if (!sortAlgorithms[selectedAlgorithm].sort(changeIndexes)) {
                 stopRunningInterval();
             }
-            isSwitchPhase = !isSwitchPhase;
+            changeIndexes = !changeIndexes;
         }
 
-        /**
-         * Buble sort comparing part. 
-         * 
-         * Compare elements which are neighbour and bigger is moved to higher index
-         */ 
-        function _sort_SwitchIfRequired() {
-            if (numbers[idxJ] > numbers[idxJ+1]) {
-                let temp = numbers[idxJ];
-                numbers[idxJ] = numbers[idxJ+1]
-                numbers[idxJ+1] = temp;
-            }
+        function _shoulHighlight(i) {
+            return sortAlgorithms[selectedAlgorithm].idxToHighlight().includes(i);
         }
 
         /**
@@ -88,17 +137,117 @@ canvas {
          * 
          * If nothing from previous is possible then it is end of sorting.
          */ 
-        function _sort_ContinueToNextCouple() {
-            if (idxI > idxJ + 1 ) {
-                idxJ++;
+        function _bubleSort(changeIndexes) {
+            if (idxI > idxJ ) {
+                if (numbers[idxJ] > numbers[idxJ+1]) {
+                    _switchNumbers(numbers, idxJ, idxJ+1);
+                }
+                if (changeIndexes) {
+                    idxJ++;
+                }
                 return true;
             } else if (idxI > 1) {
-                idxI--;
-                idxJ = 0;
+                if (changeIndexes) {
+                    idxI--;
+                    idxJ = 0;
+                }
                 return true;
             }
             return false;
         }
+
+        function _insertSort(changeIndexes) {
+            if (idxJ >= 0) {
+                if (numbers[idxJ] > numbers[idxJ+1]) {
+                    _switchNumbers(numbers, idxJ, idxJ+1);
+                    if (!changeIndexes) {
+                        changesToRevert.push(idxJ);
+                        changesToRevert.push(idxJ+1);
+                    }
+                } else if (changeIndexes) {
+                    if (idxI < numbers.length) { //tato cast je rovnaka ako hlavny else if (je to vlastne break)
+                        idxI++;
+                        idxJ = idxI - 1;
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (changeIndexes) {
+                    idxJ--;
+                }
+                return true;
+            } else if (idxI < numbers.length) {
+                if (changeIndexes) {
+                    idxI++;
+                    idxJ = idxI - 1;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function _selectSort(changeIndexes) {
+            if (idxJ < numbers.length) {
+                if (numbers[idxJ] < numbers[idxA]) {
+                    _switchNumbers(numbers, idxJ, idxA);
+                    if (!changeIndexes) {
+                        changesToRevert.push(idxJ);
+                        changesToRevert.push(idxA);
+                    }
+                }
+                if (changeIndexes) {
+                    idxJ++;
+                }
+                return true;
+            } else if (idxI < numbers.length - 1) {
+                if (changeIndexes) {
+                    idxI++;
+                    idxA = idxI; //minimal element will be frist element of unordered array part
+                    idxJ = idxI + 1; //idxJ is set to next element in unordered part
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Select sort without steps
+         */
+        function selectSort() {
+            //i - pointer to first element of unsorted part
+            for (let i = 0; i < numbers.length - 1; i++) {
+                indMin = i;
+                for (let j = i + 1; j < numbers.length ; j++) {
+                    if (numbers[j] < numbers[indMin]) {
+                        _switchNumbers(numbers, j, indMin);
+                    }
+                }
+            }
+        }
+        function _switchNumbers(arr, idx1, idx2) {
+            let temp = arr[idx1];
+            numbers[idx1] = numbers[idx2]
+            numbers[idx2] = temp;
+        }
+
+
+        // /**
+        //  * Insert sort without steps.
+        //  */
+        // function insertSort() {
+        //     for (let i = 1; i < numbers.length; i++) {
+        //         for (j = i-1; j >=0; j--) {
+        //             if (numbers[j+1] < numbers[j]) {
+        //                 let temp = numbers[j+1];
+        //                 numbers[j+1] = numbers[j];
+        //                 numbers[j] = temp;
+        //             } else {                        
+        //                 break;
+        //             }
+        //         }                
+        //     }
+        // }
 
 
         /**
@@ -159,11 +308,23 @@ canvas {
             }
         }
         
+
+        function changeSortAlgorithm(event) {
+            selectedAlgorithm = event.target.value;
+            stopRunningInterval();
+            start();
+        }
+
         </script>
         <br />
         <input id="idStepModeBtn" type="button" value="Step mode" onclick="onClickStepMode()" title="Next step of sorting will be displayed only after click on Next step button."/>
         <input id="idNextStepBtn" type="button" value="Next step" disabled="true" onclick="onClickNextStep()" />
         <input id="idSpeedInput" type="text" onblur="onBlurSpeed(event)"/>
+        <select id="idSelectSortAlgorithm" onchange="changeSortAlgorithm(event)">
+            <option value="0">Buble</option>
+            <option value="1">Insert</option>
+            <option value="2">Select</option>
+        </select> 
 </body>
 </html>
 
