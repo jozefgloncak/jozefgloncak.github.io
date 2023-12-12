@@ -6,7 +6,12 @@
 
     const NASOBOK = "nasobok";
     const NASOBENIE_S = "nasobenieS";
+    const NASOBENIE_S_VSETKO = "nasobenieSVsetko";
     const ALL = "Vsetko";
+    const EL_NASOBKY = "nasobky";
+    const EL_NASOBOK_VSETKO = "nasobokVsetko";
+    const EL_RESULT = "result";
+    const EL_GENEROVAT_BTN = "generate"
     var skipList = new Set([0, 1, 2, 10]);
     var pool = [];
     var amount = 0
@@ -52,7 +57,8 @@
         let idxProblem = Math.floor(Math.random() * this.pool.length);
         if (generatedCouples != amount && this.pool.length != 0) {
             this.currentCouple = this.pool[idxProblem]
-            document.getElementById("problem").textContent = this.currentCouple[0] + " . " + this.currentCouple[1];
+            document.getElementById("problem").textContent = this.currentCouple[0] + " . " + this.currentCouple[1] +
+                " = ";
             this.pool.splice(idxProblem, 1);
 
             document.getElementById("result").value = "";
@@ -87,40 +93,59 @@
         evalEl.prepend(divEl);
     }
 
-    function handleEnter(ev) {
-        if (ev.key === "Enter") {
-            validateResult()
-            selectCouple()
+    function setCheckboxesChecked(ev, elPrefix) {
+        for (let i = 0; i <= 10; i++) {
+            document.getElementById(elPrefix + i).checked = ev.target.checked
         }
     }
 
     function afterLoad() {
-        setFocus('start');
+        setFocus(EL_GENEROVAT_BTN);
         //generate radio buttons for nasobky
-        nasobkyEl = document.getElementById("nasobky");
+        nasobokEl = document.getElementById(NASOBOK);
         for (let i = 0; i <= 10; i++) {
-            generateRadioButton(nasobkyEl, i, NASOBOK, !this.skipList.has(i))
+            generateRadioButton(nasobokEl, i, NASOBOK, !this.skipList.has(i))
         }
-        let riElNasobky = generateRadioButton(nasobkyEl, ALL, NASOBOK, false)
-        nasobenieSEl = document.getElementById("nasobenieS");
+
+        nasobenieSEl = document.getElementById(NASOBENIE_S);
         for (let i = 0; i <= 10; i++) {
             generateRadioButton(nasobenieSEl, i, NASOBENIE_S, !this.skipList.has(i))
         }
-        let riElNasobkyS = generateRadioButton(nasobenieSEl, ALL, NASOBENIE_S, false)
 
-        riElNasobkyS.addEventListener("click", (ev) => {
-            for (let i = 0; i <= 10; i++) {
-                document.getElementById(NASOBENIE_S + i).checked = ev.target.checked
-            }
-        })
+        nasobenieSVsetkoEl = document.getElementById(NASOBENIE_S_VSETKO);
+        nasobenieSVsetkoEl.addEventListener("click", ev => {setCheckboxesChecked(ev, NASOBENIE_S)})
 
-        riElNasobky.addEventListener("click", (ev) => {
-            for (let i = 0; i <= 10; i++) {
-                document.getElementById(NASOBOK + i).checked = ev.target.checked
+        riElNasobokVsetko = document.getElementById(EL_NASOBOK_VSETKO)
+        riElNasobokVsetko.addEventListener("click", ev => {setCheckboxesChecked(ev, NASOBOK)})
+
+        //handler for enter on result input element
+        resultEl = document.getElementById(EL_RESULT);
+        resultEl.addEventListener("keyup", ev => {
+            if (ev.key === "Enter") {
+                validateResult()
+                selectCouple()
             }
-        })
+        });
+
+        //handler for generovat button
+        generateButtonEl = document.getElementById(EL_GENEROVAT_BTN);
+        generateButtonEl.addEventListener("click", ev => {generate(ev)});
+
     }
 
+    /**
+     * Create radio button with label wrapped inside div.
+     *
+     * Example: <div>
+     *            <label for={id+idSuffix} class="text">{isDuffix}</label>
+     *            <input type="checkbox" id="{id+idSuffix} checked={checked} />
+     *          </div>
+     * @param parent
+     * @param idSuffix
+     * @param id
+     * @param check
+     * @returns {HTMLInputElement}
+     */
     function generateRadioButton(parent, idSuffix, id, check) {
         let divEl = document.createElement("div");
         divEl.className = "w3-right-align w3-col s6 m2"
@@ -139,42 +164,53 @@
     }
 
     function setFocus(elId) {
-        let startButton = document.getElementById(elId)
-        startButton.focus({focusVisible: true})
+        let el = document.getElementById(elId)
+        el.focus({focusVisible: true})
     }
 </script>
 <style>
 
     input[type="checkbox"] {
-        width:30px;
-        height:30px;
+        width: 50px;
+        height: 50px;
     }
     .text {
-        font-size: 25px;
+        font-size: 40px;
+    }
+
+    .mainText {
+        font-size: 60px;
     }
 </style>
 <body onload="afterLoad()">
-    <div class="w3-row" style="max-width:800px">
+    <div class="w3-row" style="max-width:900px">
         <label for="amount" value="">Počet príkladov:</label>
-        <input type="input" id="amount" value="20" />
+        <input type="input" id="amount" value="20" class="text" style="width:100px"/>
         <br />
         Násobky čísla:
-        <div id="nasobky" class="w3-row w3-margin"></div>
-
+        <div class="w3-right-align w3-margin">
+            <label class="text">Všetky</label>
+            <input type="checkbox" id="nasobokVsetko">
+        </div>
+        <div id="nasobok" class="w3-row w3-margin"></div>
         <br />
         Vynechaj násobenie s:
+        
+        <div class="w3-right-align w3-margin">
+            <label class="text">Všetky</label>
+            <input type="checkbox" id="nasobenieSVsetko">
+        </div>
         <div id="nasobenieS" class="w3-row w3-margin"></div>
     </div>
     <br />
     <br/>
 
-    <input type="button" id="start" value="Generovať" onclick="generate(event)"/>
+    <input type="button" id="generate" value="Generovať" />
     <div id="container"  class="w3-row ">
         <div id="problems" style="visibility:hidden"
              class="w3-col w3-margin w3-sand w3-padding-16 s12 m5">
-            <span id="problem" class="text"></span>
-            <span class="text">=</span>
-            <input id="result" maxlength="2" style="width: 75px" onkeyup="handleEnter(event)" class="text"></input>
+            <span id="problem" class="mainText"></span>
+            <input id="result" maxlength="2" style="width: 100px" class="mainText" ></input>
         </div>
         <div id="evaluation" class="w3-col w3-margin s12 m5 w3-light-grey">
         </div>
