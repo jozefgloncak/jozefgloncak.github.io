@@ -87,7 +87,7 @@
 
     function addToEvaluation(currentCouple, response, correctResponse) {
         let divEl = document.createElement("div");
-        divEl.className="w3-col w3-margin s6 m2"
+        divEl.className="w3-col  s6 m4 l3"
         divEl.textContent = this.currentCouple[0] + " . " + this.currentCouple[1] + " = " + response;
         divEl.style.color = "green";
         if (response != correctResponse) {
@@ -233,11 +233,11 @@
         <span id="finalResult"></span>
         <div id="container"  class="w3-row ">
             <div id="problems" style="visibility:hidden"
-                 class="w3-col w3-margin-top w3-sand w3-padding-16 s12 m5">
+                 class="w3-col w3-margin-top w3-margin-right w3-sand w3-padding-16 s12 m5">
                 <span id="problem" class="mainText w3-margin-left"></span>
                 <input id="result" maxlength="2" style="width: 100px" class="mainText" ></input>
             </div>
-            <div id="evaluation" class="w3-row  w3-margin w3-col 12 m5 w3-light-grey" style="min-height: 300px">
+            <div id="evaluation" class="w3-row  w3-margin-top w3-col 12 m5 w3-light-grey" style="min-height: 300px">
             <!--  dynamic addition of content              -->
             </div>
         </div>
