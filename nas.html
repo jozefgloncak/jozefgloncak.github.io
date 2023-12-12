@@ -87,7 +87,7 @@
 
     function addToEvaluation(currentCouple, response, correctResponse) {
         let divEl = document.createElement("div");
-        divEl.className="w3-col  s6 m4 l3"
+        divEl.className="w3-col  s6 m4 l3 w3-padding-small"
         divEl.textContent = this.currentCouple[0] + " . " + this.currentCouple[1] + " = " + response;
         divEl.style.color = "green";
         if (response != correctResponse) {
