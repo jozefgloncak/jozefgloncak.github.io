@@ -4,6 +4,9 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <script>
 
+    const OPERATION_MULTIPLICATION = 0;
+    const OPERATION_DIVISION = 1;
+
     const NASOBOK = "nasobok";
     const NASOBENIE_S = "nasobenieS";
     const NASOBENIE_S_VSETKO = "nasobenieSVsetko";
@@ -14,36 +17,56 @@
     const EL_GENEROVAT_BTN = "generate";
     const EL_SETTINGS = "settings";
     const EL_SETTINGS_BTN = "settingsBtn";
+    const EL_MULTIPLICATION_CHB = "multyChB"
+    const EL_DIVISION_CHB = "divisionChB"
     var skipList = new Set([0, 1, 2, 10]);
-    var pool = [];
     var amount = 0
     var generatedCouples = 0
     var currentCouple
     var totalIncorrect = 0
+    var selectedOperation
+    var operations
 
     /**
      * List of couples from which are generated examples.
      */
     function generateProblemsPool() {
-        this.pool = [];
+        operations = {}
+        operations[OPERATION_MULTIPLICATION] = [];
+        operations[OPERATION_DIVISION] = [];
         for (let i = 0; i <= 10; i++) {
             for (let j = 0; j <= 10; j++) {
                 if (document.getElementById(NASOBOK+i).checked &&
                     document.getElementById(NASOBENIE_S+j).checked) {
-                    this.pool.push([i, j]);
+                    operations[OPERATION_MULTIPLICATION].push([i, j]);
+                    if (i !== 0) {
+                        operations[OPERATION_DIVISION].push([i * j, i]);
+                    }
                 }
             }
         }
     }
 
+    function resolveOperations() {
+        generateProblemsPool();
+        if (!document.getElementById(EL_MULTIPLICATION_CHB).checked) {
+            delete operations[OPERATION_MULTIPLICATION];
+        }
+        if (!document.getElementById(EL_DIVISION_CHB).checked) {
+            delete operations[OPERATION_DIVISION];
+        }
+
+    }
+
     function generate() {
+        resolveOperations()
         document.getElementById(EL_SETTINGS).style.display = 'none';
-        this.currentCouple = null;
-        this.generatedCouples = 0
+        currentCouple = null;
+        generatedCouples = 0
         document.getElementById("finalResult").textContent = ""
         document.getElementById(EL_RESULT).disabled = false;
-        this.totalIncorrect = 0
-        generateProblemsPool();
+        totalIncorrect = 0
+
         //disable input for number of examples
         amount = parseInt(document.getElementById("amount").value);
         let amountEl = document.getElementById("amount");
@@ -57,13 +80,22 @@
         setFocus("result")
     }
 
+    function selectOperation() {
+        let keys = Object.keys(operations);
+        return keys[Math.floor(Math.random()*keys.length)];
+
+    }
+
     function selectCouple() {
-        let idxProblem = Math.floor(Math.random() * this.pool.length);
-        if (generatedCouples != amount && this.pool.length != 0) {
-            this.currentCouple = this.pool[idxProblem]
-            document.getElementById("problem").textContent = this.currentCouple[0] + " . " + this.currentCouple[1] +
+        selectedOperation = selectOperation();
+        let selectedPool = operations[selectedOperation];
+        let idxProblem = Math.floor(Math.random() * selectedPool.length);
+        if (generatedCouples != amount && selectedPool.length != 0) {
+            currentCouple = selectedPool[idxProblem]
+            let operationMark = selectedOperation == OPERATION_MULTIPLICATION ? " . " : " : ";
+            document.getElementById("problem").textContent = currentCouple[0] + operationMark + currentCouple[1] +
                 " = ";
-            this.pool.splice(idxProblem, 1);
+            selectedPool.splice(idxProblem, 1);
 
             document.getElementById("result").value = "";
             generatedCouples++
@@ -78,9 +110,14 @@
     }
 
     function validateResult() {
-        if (currentCouple) {
+        if (currentCouple && selectedOperation) {
             response = document.getElementById("result").value
-            let correctResponse = currentCouple[0] * currentCouple[1]
+            let correctResponse = 0;
+            if (selectedOperation == OPERATION_MULTIPLICATION) {
+                correctResponse = currentCouple[0] * currentCouple[1]
+            } else {
+                correctResponse = Math.floor(currentCouple[0] / currentCouple[1]);
+            }
             addToEvaluation(currentCouple, response, correctResponse)
         }
     }
@@ -88,10 +125,11 @@
     function addToEvaluation(currentCouple, response, correctResponse) {
         let divEl = document.createElement("div");
         divEl.className="w3-col  s6 m4 l3 w3-padding-small"
-        divEl.textContent = this.currentCouple[0] + " . " + this.currentCouple[1] + " = " + response;
+        let operationMark = selectedOperation == OPERATION_MULTIPLICATION ? " . " : " : ";
+        divEl.textContent = currentCouple[0] + operationMark + currentCouple[1] + " = " + response;
         divEl.style.color = "green";
         if (response != correctResponse) {
-            this.totalIncorrect++;
+            totalIncorrect++;
             divEl.textContent += "(" + correctResponse + ")";
             divEl.style.color = "red";
         }
@@ -110,12 +148,12 @@
         //generate radio buttons for nasobky
         nasobokEl = document.getElementById(NASOBOK);
         for (let i = 0; i <= 10; i++) {
-            generateRadioButton(nasobokEl, i, NASOBOK, !this.skipList.has(i))
+            generateRadioButton(nasobokEl, i, NASOBOK, !skipList.has(i))
         }
 
         nasobenieSEl = document.getElementById(NASOBENIE_S);
         for (let i = 0; i <= 10; i++) {
-            generateRadioButton(nasobenieSEl, i, NASOBENIE_S, !this.skipList.has(i))
+            generateRadioButton(nasobenieSEl, i, NASOBENIE_S, !skipList.has(i))
         }
 
         nasobenieSVsetkoEl = document.getElementById(NASOBENIE_S_VSETKO);
@@ -208,17 +246,23 @@
     <div class="w3-margin">
         <input id="settingsBtn" type="button" value="Nastavenia" class="w3-button w3-green btn" />
         <div id="settings" class="w3-row" style="max-width:900px">
+            <label for="amount" value="">Násobenie:</label>
+            <input type="checkbox" id="multyChB" checked/>
+
+            <label for="amount" value="">Delenie:</label>
+            <input type="checkbox" id="divisionChB" />
+            <br />
             <label for="amount" value="">Počet príkladov:</label>
             <input type="input" id="amount" value="20" class="text" style="width:100px"/>
             <br />
-            Násobky čísla:
+            Násobky čísla resp. delitele pri delení:
             <div class="w3-right-align w3-margin">
                 <label class="text">Všetky</label>
                 <input type="checkbox" id="nasobokVsetko">
             </div>
             <div id="nasobok" class="w3-row w3-margin"></div>
             <br />
-            Vynechaj násobenie s:
+            Zahrň násobenie s resp. výsledky po delení:
 
             <div class="w3-right-align w3-margin">
                 <label class="text">Všetky</label>
