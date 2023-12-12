@@ -11,7 +11,9 @@
     const EL_NASOBKY = "nasobky";
     const EL_NASOBOK_VSETKO = "nasobokVsetko";
     const EL_RESULT = "result";
-    const EL_GENEROVAT_BTN = "generate"
+    const EL_GENEROVAT_BTN = "generate";
+    const EL_SETTINGS = "settings";
+    const EL_SETTINGS_BTN = "settingsBtn";
     var skipList = new Set([0, 1, 2, 10]);
     var pool = [];
     var amount = 0
@@ -35,9 +37,11 @@
     }
 
     function generate() {
+        document.getElementById(EL_SETTINGS).style.display = 'none';
         this.currentCouple = null;
         this.generatedCouples = 0
         document.getElementById("finalResult").textContent = ""
+        document.getElementById(EL_RESULT).disabled = false;
         this.totalIncorrect = 0
         generateProblemsPool();
         //disable input for number of examples
@@ -64,7 +68,8 @@
             document.getElementById("result").value = "";
             generatedCouples++
         } else {
-            document.getElementById("problems").style.visibility = "hidden";
+            // document.getElementById("problems").style.visibility = "hidden";
+            document.getElementById(EL_RESULT).disabled = true;
             document.getElementById("amount").style.background = "white";
             document.getElementById("amount").disabled = false;
             let totalCorrect = amount - totalIncorrect
@@ -82,6 +87,7 @@
 
     function addToEvaluation(currentCouple, response, correctResponse) {
         let divEl = document.createElement("div");
+        divEl.className="w3-col w3-margin s6 m2"
         divEl.textContent = this.currentCouple[0] + " . " + this.currentCouple[1] + " = " + response;
         divEl.style.color = "green";
         if (response != correctResponse) {
@@ -90,7 +96,7 @@
             divEl.style.color = "red";
         }
         let evalEl = document.getElementById("evaluation");
-        evalEl.prepend(divEl);
+        evalEl.appendChild(divEl);
     }
 
     function setCheckboxesChecked(ev, elPrefix) {
@@ -130,6 +136,18 @@
         //handler for generovat button
         generateButtonEl = document.getElementById(EL_GENEROVAT_BTN);
         generateButtonEl.addEventListener("click", ev => {generate(ev)});
+
+        //handler for settings button
+        settingsButtonEl = document.getElementById(EL_SETTINGS_BTN);
+        settingsButtonEl.addEventListener("click", ev => {
+            let styles = document.getElementById(EL_SETTINGS).style
+            if (styles.display === 'none') {
+                styles.display ='block';
+            } else {
+                styles.display ='none';
+            }
+        });
+
 
     }
 
@@ -181,39 +199,47 @@
     .mainText {
         font-size: 60px;
     }
-</style>
-<body onload="afterLoad()">
-    <div class="w3-row" style="max-width:900px">
-        <label for="amount" value="">Počet príkladov:</label>
-        <input type="input" id="amount" value="20" class="text" style="width:100px"/>
-        <br />
-        Násobky čísla:
-        <div class="w3-right-align w3-margin">
-            <label class="text">Všetky</label>
-            <input type="checkbox" id="nasobokVsetko">
-        </div>
-        <div id="nasobok" class="w3-row w3-margin"></div>
-        <br />
-        Vynechaj násobenie s:
-        
-        <div class="w3-right-align w3-margin">
-            <label class="text">Všetky</label>
-            <input type="checkbox" id="nasobenieSVsetko">
-        </div>
-        <div id="nasobenieS" class="w3-row w3-margin"></div>
-    </div>
-    <br />
-    <br/>
 
-    <input type="button" id="generate" value="Generovať" />
-    <div id="container"  class="w3-row ">
-        <div id="problems" style="visibility:hidden"
-             class="w3-col w3-margin w3-sand w3-padding-16 s12 m5">
-            <span id="problem" class="mainText"></span>
-            <input id="result" maxlength="2" style="width: 100px" class="mainText" ></input>
+    .btn {
+        width:150px;
+    }
+</style>
+<body onload="afterLoad()" >
+    <div class="w3-margin">
+        <input id="settingsBtn" type="button" value="Nastavenia" class="w3-button w3-green btn" />
+        <div id="settings" class="w3-row" style="max-width:900px">
+            <label for="amount" value="">Počet príkladov:</label>
+            <input type="input" id="amount" value="20" class="text" style="width:100px"/>
+            <br />
+            Násobky čísla:
+            <div class="w3-right-align w3-margin">
+                <label class="text">Všetky</label>
+                <input type="checkbox" id="nasobokVsetko">
+            </div>
+            <div id="nasobok" class="w3-row w3-margin"></div>
+            <br />
+            Vynechaj násobenie s:
+
+            <div class="w3-right-align w3-margin">
+                <label class="text">Všetky</label>
+                <input type="checkbox" id="nasobenieSVsetko">
+            </div>
+            <div id="nasobenieS" class="w3-row w3-margin"></div>
         </div>
-        <div id="evaluation" class="w3-col w3-margin s12 m5 w3-light-grey">
+        <br />
+        <br/>
+
+        <input type="button" id="generate" value="Generovať" class="w3-button w3-green btn" />
+        <span id="finalResult"></span>
+        <div id="container"  class="w3-row ">
+            <div id="problems" style="visibility:hidden"
+                 class="w3-col w3-margin-top w3-sand w3-padding-16 s12 m5">
+                <span id="problem" class="mainText w3-margin-left"></span>
+                <input id="result" maxlength="2" style="width: 100px" class="mainText" ></input>
+            </div>
+            <div id="evaluation" class="w3-row  w3-margin w3-col 12 m5 w3-light-grey" style="min-height: 300px">
+            <!--  dynamic addition of content              -->
+            </div>
         </div>
     </div>
-    <span id="finalResult"></span>
 </body>
