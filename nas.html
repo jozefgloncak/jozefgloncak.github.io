@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <script>
 
     const NASOBOK = "nasobok";
@@ -40,6 +44,7 @@
         document.getElementById("problems").style.visibility = "visible";
         document.getElementById("problem").textContent = "";
         document.getElementById("evaluation").textContent = "";
+        selectCouple();
         setFocus("result")
     }
 
@@ -79,7 +84,7 @@
             divEl.style.color = "red";
         }
         let evalEl = document.getElementById("evaluation");
-        evalEl.appendChild(divEl);
+        evalEl.prepend(divEl);
     }
 
     function handleEnter(ev) {
@@ -118,10 +123,12 @@
 
     function generateRadioButton(parent, idSuffix, id, check) {
         let divEl = document.createElement("div");
+        divEl.className = "w3-right-align w3-col s6 m2"
         parent.appendChild(divEl);
         let riLableEl = document.createElement("label")
         riLableEl.for = id + idSuffix;
-        riLableEl.textContent = idSuffix
+        riLableEl.textContent = idSuffix;
+        riLableEl.className = "text"
         divEl.appendChild(riLableEl);
         let riEl = document.createElement("input");
         riEl.type = "checkbox";
@@ -137,35 +144,39 @@
     }
 </script>
 <style>
-    /*label {*/
-    /*    display: block;*/
-    /*}*/
 
-    span {
-        /*font-size: 50px;*/
+    input[type="checkbox"] {
+        width:30px;
+        height:30px;
+    }
+    .text {
+        font-size: 25px;
     }
 </style>
 <body onload="afterLoad()">
-    <label for="amount" value="">Počet príkladov:</label>
-    <input type="input" id="amount" value="20"/>
-    <br/>
-    Násobky čísla:
-    <div id="nasobky" style="display:flex; justify-content: space-around; width:600px"></div>
-    <br />
-    Vynechaj násobenie s:
-    <div id="nasobenieS" style="display:flex; justify-content: space-around; width:600px"></div>
+    <div class="w3-row" style="max-width:800px">
+        <label for="amount" value="">Počet príkladov:</label>
+        <input type="input" id="amount" value="20" />
+        <br />
+        Násobky čísla:
+        <div id="nasobky" class="w3-row w3-margin"></div>
 
+        <br />
+        Vynechaj násobenie s:
+        <div id="nasobenieS" class="w3-row w3-margin"></div>
+    </div>
     <br />
     <br/>
 
     <input type="button" id="start" value="Generovať" onclick="generate(event)"/>
-    <div id="container" style="display:flex; justify-content: space-around">
-        <div id="problems" style="visibility:hidden">
-            <span id="problem"></span>
-            <span>=</span>
-            <input id="result" maxlength="2" style="width: 25px" onkeyup="handleEnter(event)"></input>
+    <div id="container"  class="w3-row ">
+        <div id="problems" style="visibility:hidden"
+             class="w3-col w3-margin w3-sand w3-padding-16 s12 m5">
+            <span id="problem" class="text"></span>
+            <span class="text">=</span>
+            <input id="result" maxlength="2" style="width: 75px" onkeyup="handleEnter(event)" class="text"></input>
         </div>
-        <div id="evaluation">
+        <div id="evaluation" class="w3-col w3-margin s12 m5 w3-light-grey">
         </div>
     </div>
     <span id="finalResult"></span>
