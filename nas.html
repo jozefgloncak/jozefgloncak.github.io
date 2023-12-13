@@ -6,6 +6,10 @@
 
     const OPERATION_MULTIPLICATION = 0;
     const OPERATION_DIVISION = 1;
+    const OPERATION_ADDITION_NOT_OVER_10 = 2;
+    const OPERATION_SUBSTRACTION = 3;
+    const OPERATION_ADDITION = 4;
+    const OPERATION_SUBSTRACTION_NOT_OVER_10 = 5;
 
     const NASOBOK = "nasobok";
     const NASOBENIE_S = "nasobenieS";
@@ -17,53 +21,103 @@
     const EL_GENEROVAT_BTN = "generate";
     const EL_SETTINGS = "settings";
     const EL_SETTINGS_BTN = "settingsBtn";
-    const EL_MULTIPLICATION_CHB = "multyChB"
-    const EL_DIVISION_CHB = "divisionChB"
+    const EL_MULTIPLICATION_CHB = "multyChB";
+    const EL_DIVISION_CHB = "divisionChB";
+    const EL_ADDITION_CHB = "additionChB";
+    const EL_SUBSTRACTION_CHB = "substractionChB";
+    const EL_NOT_OVER_10_CHB = "notOver10ChB"
     var skipList = new Set([0, 1, 2, 10]);
     var amount = 0
     var generatedCouples = 0
     var currentCouple
     var totalIncorrect = 0
-    var selectedOperation
-    var operations
+    var selectedOperation = -1;
+    var operations = {}
+    var operationKeys = [];
+
+    var results = {
+        20: [0x1F922, 0x1F92E, 0x1F62D, 0x1F4A9, 0x1F999, 0x1F9BD, 0x1F311, 0x26C8, 0x1FAA6],
+        40: [0x1F615, 0x1F61F, 0x1F97A, 0x1F682, 0x1F6B2, 0x1F312, 0x2601],
+        60: [0x1F626, 0x1F683, 0x1F313, 0x26C5, 0x1F947],
+        80: [0x1F684, 0x1F314, 0x1F324, 0x1F948, 0x1F642],
+        100: [0x1F929, 0x1F60D, 0x1F44C, 0x1F44D, 0x1F44F, 0x1F4AA, 0x1F418, 0x1F315, 0x2600, 0x1F947]
+    }
+
 
     /**
      * List of couples from which are generated examples.
      */
     function generateProblemsPool() {
-        operations = {}
-        operations[OPERATION_MULTIPLICATION] = [];
-        operations[OPERATION_DIVISION] = [];
+        operationsBase[OPERATION_MULTIPLICATION] = [];
+        operationsBase[OPERATION_DIVISION] = [];
         for (let i = 0; i <= 10; i++) {
             for (let j = 0; j <= 10; j++) {
                 if (document.getElementById(NASOBOK+i).checked &&
                     document.getElementById(NASOBENIE_S+j).checked) {
-                    operations[OPERATION_MULTIPLICATION].push([i, j]);
+                    operationsBase[OPERATION_MULTIPLICATION].push([i, j]);
                     if (i !== 0) {
-                        operations[OPERATION_DIVISION].push([i * j, i]);
+                        operationsBase[OPERATION_DIVISION].push([i * j, i]);
                     }
                 }
             }
         }
     }
 
-    function resolveOperations() {
-        generateProblemsPool();
-        if (!document.getElementById(EL_MULTIPLICATION_CHB).checked) {
-            delete operations[OPERATION_MULTIPLICATION];
+    /**
+     * List of couples for addition and substraction
+     */
+    function generateProblemsAdditionAndSubstraction() {
+        operationsBase[OPERATION_SUBSTRACTION] = []
+        operationsBase[OPERATION_ADDITION] = []
+        operationsBase[OPERATION_ADDITION_NOT_OVER_10] = []
+        operationsBase[OPERATION_SUBSTRACTION_NOT_OVER_10] = []
+        for (let i = 0; i <= 100; i++) {
+            for (let j = i; j + i <= 100; j++) {
+                sum = i + j;
+                operationsBase[OPERATION_ADDITION].push([i, j]);
+                operationsBase[OPERATION_SUBSTRACTION].push([i + j, i]);
+                operationsBase[OPERATION_SUBSTRACTION].push([i + j, j]);
+                if (Math.floor(Math.max(i, j) / 10) === Math.floor((i + j) / 10)) {
+                    operationsBase[OPERATION_ADDITION_NOT_OVER_10].push([i, j]);
+                    operationsBase[OPERATION_SUBSTRACTION_NOT_OVER_10].push([i + j, Math.min(i, j)]);
+                }
+            }
         }
-        if (!document.getElementById(EL_DIVISION_CHB).checked) {
-            delete operations[OPERATION_DIVISION];
-        }
+    }
 
+    function resolveOperations() {
+        operationKeys = [];
+        if (document.getElementById(EL_MULTIPLICATION_CHB).checked) {
+            operationKeys.push(OPERATION_MULTIPLICATION);
+        }
+        if (document.getElementById(EL_DIVISION_CHB).checked) {
+            operationKeys.push(OPERATION_DIVISION);
+        }
+        if (document.getElementById(EL_NOT_OVER_10_CHB).checked) {
+            if (document.getElementById(EL_ADDITION_CHB).checked) {
+                operationKeys.push(OPERATION_ADDITION_NOT_OVER_10);
+            }
+            if (document.getElementById(EL_SUBSTRACTION_CHB).checked) {
+                operationKeys.push(OPERATION_SUBSTRACTION_NOT_OVER_10);
+            }
+        } else {
+            if (document.getElementById(EL_ADDITION_CHB).checked) {
+                operationKeys.push(OPERATION_ADDITION);
+            }
+            if (document.getElementById(EL_SUBSTRACTION_CHB).checked) {
+                operationKeys.push(OPERATION_SUBSTRACTION);
+            }
+        }
     }
 
     function generate() {
+        copyPools();
         resolveOperations()
         document.getElementById(EL_SETTINGS).style.display = 'none';
         currentCouple = null;
         generatedCouples = 0
         document.getElementById("finalResult").textContent = ""
+        document.getElementById("finalResultEmoji").textContent = ""
         document.getElementById(EL_RESULT).disabled = false;
         totalIncorrect = 0
 
@@ -81,9 +135,26 @@
     }
 
     function selectOperation() {
-        let keys = Object.keys(operations);
-        return keys[Math.floor(Math.random()*keys.length)];
+        idx = Math.floor(Math.random()*operationKeys.length)
+        if (idx === operationKeys.length) {
+            idx--;
+        }
+        return operationKeys[idx];
+    }
 
+    function resolveOperatorMark(operation) {
+        switch(operation) {
+            case OPERATION_SUBSTRACTION:
+            case OPERATION_SUBSTRACTION_NOT_OVER_10:
+                return " - ";
+            case OPERATION_ADDITION:
+            case OPERATION_ADDITION_NOT_OVER_10:
+                return " + ";
+            case OPERATION_MULTIPLICATION:
+                return " * ";
+            case OPERATION_DIVISION:
+                return " : ";
+        }
     }
 
     function selectCouple() {
@@ -92,7 +163,7 @@
         let idxProblem = Math.floor(Math.random() * selectedPool.length);
         if (generatedCouples != amount && selectedPool.length != 0) {
             currentCouple = selectedPool[idxProblem]
-            let operationMark = selectedOperation == OPERATION_MULTIPLICATION ? " . " : " : ";
+            let operationMark = resolveOperatorMark(selectedOperation);
             document.getElementById("problem").textContent = currentCouple[0] + operationMark + currentCouple[1] +
                 " = ";
             selectedPool.splice(idxProblem, 1);
@@ -105,27 +176,40 @@
             document.getElementById("amount").style.background = "white";
             document.getElementById("amount").disabled = false;
             let totalCorrect = amount - totalIncorrect
-            document.getElementById("finalResult").textContent = "Správne: " + totalCorrect + "/" + amount;
+            document.getElementById("finalResult").textContent = "Správne: " + totalCorrect + "/" + amount
+            document.getElementById("finalResultEmoji").textContent =
+                String.fromCodePoint(giveEmoji(100*totalCorrect/amount));
         }
     }
 
     function validateResult() {
-        if (currentCouple && selectedOperation) {
+        if (currentCouple && selectedOperation !== -1) {
             response = document.getElementById("result").value
             let correctResponse = 0;
-            if (selectedOperation == OPERATION_MULTIPLICATION) {
-                correctResponse = currentCouple[0] * currentCouple[1]
-            } else {
-                correctResponse = Math.floor(currentCouple[0] / currentCouple[1]);
+            switch (selectedOperation) {
+                case OPERATION_SUBSTRACTION:
+                case OPERATION_SUBSTRACTION_NOT_OVER_10:
+                    correctResponse = currentCouple[0] - currentCouple[1];
+                    break;
+                case OPERATION_ADDITION:
+                case OPERATION_ADDITION_NOT_OVER_10:
+                    correctResponse = currentCouple[0] + currentCouple[1];
+                    break;
+                case OPERATION_MULTIPLICATION:
+                    correctResponse = currentCouple[0] * currentCouple[1];
+                    break;
+                case OPERATION_DIVISION:
+                    correctResponse = Math.floor(currentCouple[0] / currentCouple[1]);
             }
-            addToEvaluation(currentCouple, response, correctResponse)
+            addToEvaluation(currentCouple, response, correctResponse);
         }
+        selectedOperation = -1;
     }
 
     function addToEvaluation(currentCouple, response, correctResponse) {
         let divEl = document.createElement("div");
         divEl.className="w3-col  s6 m4 l3 w3-padding-small"
-        let operationMark = selectedOperation == OPERATION_MULTIPLICATION ? " . " : " : ";
+        let operationMark = resolveOperatorMark(selectedOperation);
         divEl.textContent = currentCouple[0] + operationMark + currentCouple[1] + " = " + response;
         divEl.style.color = "green";
         if (response != correctResponse) {
@@ -186,6 +270,9 @@
             }
         });
 
+        operationsBase = {}
+        generateProblemsPool();
+        generateProblemsAdditionAndSubstraction();
 
     }
 
@@ -204,18 +291,19 @@
      */
     function generateRadioButton(parent, idSuffix, id, check) {
         let divEl = document.createElement("div");
-        divEl.className = "w3-right-align w3-col s6 m2"
+        divEl.className = "w3-col s6 m2"
         parent.appendChild(divEl);
         let riLableEl = document.createElement("label")
         riLableEl.for = id + idSuffix;
         riLableEl.textContent = idSuffix;
-        riLableEl.className = "text"
-        divEl.appendChild(riLableEl);
+        riLableEl.className = "text w3-cell-middle"
         let riEl = document.createElement("input");
         riEl.type = "checkbox";
         riEl.id = id + idSuffix;
         riEl.checked = check;
+        riEl.className =  "w3-cell-middle"
         divEl.appendChild(riEl);
+        divEl.appendChild(riLableEl);
         return riEl;
     }
 
@@ -223,6 +311,45 @@
         let el = document.getElementById(elId)
         el.focus({focusVisible: true})
     }
+
+    function copyPools() {
+        operations = {}
+        let keys = Object.keys(operationsBase)
+        for (let key in keys) {
+            operations[key] = [];
+            for (let i = 0; i< operationsBase[key].length; i++) {
+                operations[key].push([operationsBase[key][i][0], operationsBase[key][i][1]]);
+            }
+        }
+    }
+
+    function emoji() {
+        body = document.getElementsByTagName("body")[0]
+        Object.keys(results)
+        for (key of Object.keys(results)) {
+            console.log('>>>>>', key)
+            for (val of results[key]) {
+                childEl = document.createElement("p");
+                res =  String.fromCodePoint(val);
+                childEl.textContent = res
+                body.prepend(childEl)
+                console.log(res)
+            }
+        }
+    }
+
+    function giveEmoji(score) {
+        let foundKey = null;
+        for (key of Object.keys(results)) {
+            if (score <= key) {
+                foundKey = key;
+                break;
+            }
+        }
+        let idx = Math.ceil(Math.random()*results[foundKey].length)-1
+        return results[foundKey][idx];
+    }
+
 </script>
 <style>
 
@@ -245,36 +372,66 @@
 <body onload="afterLoad()" >
     <div class="w3-margin">
         <input id="settingsBtn" type="button" value="Nastavenia" class="w3-button w3-green btn" />
+        <br />
+        <br />
         <div id="settings" class="w3-row" style="max-width:900px">
-            <label for="amount" value="">Násobenie:</label>
-            <input type="checkbox" id="multyChB" checked/>
-
-            <label for="amount" value="">Delenie:</label>
-            <input type="checkbox" id="divisionChB" />
-            <br />
-            <label for="amount" value="">Počet príkladov:</label>
-            <input type="input" id="amount" value="20" class="text" style="width:100px"/>
-            <br />
-            Násobky čísla resp. delitele pri delení:
-            <div class="w3-right-align w3-margin">
-                <label class="text">Všetky</label>
-                <input type="checkbox" id="nasobokVsetko">
+            <div class="w3-col w3-section w3-cell-row">
+                <input class="w3-cell-middle" type="checkbox" id="additionChB" />
+                <label class="w3-cell-middle" for="additionChB" value="">Sčítanie</label>
             </div>
-            <div id="nasobok" class="w3-row w3-margin"></div>
-            <br />
-            Zahrň násobenie s resp. výsledky po delení:
 
-            <div class="w3-right-align w3-margin">
-                <label class="text">Všetky</label>
-                <input type="checkbox" id="nasobenieSVsetko">
+            <div class="w3-col w3-section w3-cell-row">
+                <input class="w3-cell-middle" type="checkbox" id="substractionChB" />
+                <label class="w3-cell-middle" for="substractionChB" value="">Odčítanie</label>
             </div>
-            <div id="nasobenieS" class="w3-row w3-margin"></div>
+
+            <div class="w3-col w3-section w3-cell-row" style="margin-left: 16px;">
+                <input class="w3-cell-middle" type="checkbox" id="notOver10ChB" />
+                <label class="w3-cell-middle"  for="notOver10ChB" value="">Nie cez 10</label>
+            </div>
+            <div class="w3-col">
+                <hr>
+            </div>
+            <div class="w3-col w3-section w3-cell-row">
+                <input class="w3-cell-middle" type="checkbox" id="multyChB" checked />
+                <label class="w3-cell-middle" for="multyChB" value="">Násobenie</label>
+            </div>
+
+            <div class="w3-col w3-section w3-cell-row">
+                <input class="w3-cell-middle" type="checkbox" id="divisionChB" />
+                <label class="w3-cell-middle" for="divisionChB" value="">Delenie</label>
+            </div>
+            <div class="w3-margin">
+                <div class="w3-col w3-section w3-cell-row">
+                    Násobky čísla resp. delitele pri delení:
+                </div>
+                <div class="w3-col w3-section w3-cell-row">
+                    <input class="w3-cell-middle" type="checkbox" id="nasobokVsetko">
+                    <label class="w3-cell-middle" class="text">Všetky</label>
+                </div>
+                <div id="nasobok" class="w3-row w3-section"></div>
+
+                <div class="w3-col w3-section w3-cell-row">
+                    Zahrň násobenie s resp. výsledky po delení:
+                </div>
+
+                <div class="w3-col w3-section w3-cell-row">
+                    <input class="w3-cell-middle" type="checkbox" id="nasobenieSVsetko">
+                    <label class="w3-cell-middle" class="text">Všetky</label>
+                </div>
+                <div id="nasobenieS" class="w3-row w3-section"></div>
+            </div>
+            <div class="w3-col">
+                <label for="amount" value="">Počet príkladov:</label>
+                <input type="input" id="amount" value="20" class="text" style="width:100px"/>
+            </div>
         </div>
         <br />
         <br/>
 
         <input type="button" id="generate" value="Generovať" class="w3-button w3-green btn" />
         <span id="finalResult"></span>
+        <span id="finalResultEmoji" style="font-size: 100px"></span>
         <div id="container"  class="w3-row ">
             <div id="problems" style="visibility:hidden"
                  class="w3-col w3-margin-top w3-margin-right w3-sand w3-padding-16 s12 m5">
