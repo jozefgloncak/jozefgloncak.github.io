@@ -34,6 +34,10 @@
     var selectedOperation = -1;
     var operations = {}
     var operationKeys = [];
+    /**
+     * id of timer variable
+     */
+    var timerVar;
 
     var results = {
         20: [0x1F922, 0x1F92E, 0x1F62D, 0x1F4A9, 0x1F999, 0x1F9BD, 0x1F311, 0x26C8, 0x1FAA6],
@@ -111,6 +115,7 @@
     }
 
     function generate() {
+        startInterval(true);
         copyPools();
         resolveOperations()
         document.getElementById(EL_SETTINGS).style.display = 'none';
@@ -170,6 +175,7 @@
 
             document.getElementById("result").value = "";
             generatedCouples++
+            startInterval();
         } else {
             // document.getElementById("problems").style.visibility = "hidden";
             document.getElementById(EL_RESULT).disabled = true;
@@ -179,6 +185,7 @@
             document.getElementById("finalResult").textContent = "Správne: " + totalCorrect + "/" + amount
             document.getElementById("finalResultEmoji").textContent =
                 String.fromCodePoint(giveEmoji(100*totalCorrect/amount));
+            stopInterval();
         }
     }
 
@@ -227,6 +234,11 @@
         }
     }
 
+    function submitAnswer() {
+        validateResult()
+        selectCouple()
+    }
+
     function afterLoad() {
         setFocus(EL_GENEROVAT_BTN);
         //generate radio buttons for nasobky
@@ -250,8 +262,8 @@
         resultEl = document.getElementById(EL_RESULT);
         resultEl.addEventListener("keyup", ev => {
             if (ev.key === "Enter") {
-                validateResult()
-                selectCouple()
+                stopInterval();
+                submitAnswer();
             }
         });
 
@@ -323,6 +335,26 @@
         }
     }
 
+    function startInterval(force) {
+        if (force || !timerVar) {
+            if (timerVar) {
+                clearInterval(timerVar)
+            }
+            let timerVal = document.getElementById("timeLimit").value
+            if (timerVal) {
+                timerVar = setInterval(submitAnswer, document.getElementById("timeLimit").value * 1000);
+            }
+        }
+    }
+
+    function stopInterval() {
+        if (timerVar) {
+            clearInterval(timerVar);
+            timerVar = null;
+        }
+    }
+
+
     function emoji() {
         body = document.getElementsByTagName("body")[0]
         Object.keys(results)
@@ -367,6 +399,12 @@
 
     .btn {
         width:150px;
+    }
+    .tooltip {
+        position:absolute;
+        left:0;
+        bottom:30px;
+        background-color: darkseagreen;
     }
 </style>
 <body onload="afterLoad()" >
@@ -421,9 +459,21 @@
                 </div>
                 <div id="nasobenieS" class="w3-row w3-section"></div>
             </div>
+            <div class="w3-col w3-section w3-cell-row">
+                <label class="w3-tooltip" for="timeLimit" value="" style="display:block">Časový limit (sec.):
+                    <div class="w3-text w3-padding tooltip">
+                        Časový limit na vyriešenie jedného príkladu. Ak prázdne, tak limit nie je nastavený.
+                    </div>
+                </label>
+                <input type="input" id="timeLimit" value="" />
+            </div>
             <div class="w3-col">
-                <label for="amount" value="">Počet príkladov:</label>
-                <input type="input" id="amount" value="20" class="text" style="width:100px"/>
+                <label class="w3-cell-middle w3-tooltip" for="amount" value="" style="display:block">Počet príkladov:
+                    <div class="w3-text w3-padding tooltip">
+                        Udáva počet príkladov, ktoré sa budú generovať.
+                    </div>
+                </label>
+                <input class="w3-cell-middle" type="input" id="amount" value="20" class="text" style="width:100px"/>
             </div>
         </div>
         <br />
