@@ -26,6 +26,7 @@
     const EL_ADDITION_CHB = "additionChB";
     const EL_SUBSTRACTION_CHB = "substractionChB";
     const EL_NOT_OVER_10_CHB = "notOver10ChB"
+    const EL_EVALUATION = "evaluation";
     var skipList = new Set([0, 1, 2, 10]);
     var amount = 0
     var generatedCouples = 0
@@ -114,10 +115,8 @@
         }
     }
 
-    function generate() {
-        startInterval(true);
-        copyPools();
-        resolveOperations()
+    function generateFrontend() {
+        generate();
         document.getElementById(EL_SETTINGS).style.display = 'none';
         currentCouple = null;
         generatedCouples = 0
@@ -134,9 +133,20 @@
 
         document.getElementById("problems").style.visibility = "visible";
         document.getElementById("problem").textContent = "";
-        document.getElementById("evaluation").textContent = "";
+        document.getElementById(EL_EVALUATION).textContent = "";
         selectCouple();
         setFocus("result")
+
+    }
+
+    function generate() {
+        //>>>>if special button for submitting settings then this part there
+        generateProblemsPool();
+        generateProblemsAdditionAndSubstraction();
+        //<<<<<<<
+        startInterval(true);
+        copyPools();
+        resolveOperations()
     }
 
     function selectOperation() {
@@ -163,29 +173,36 @@
     }
 
     function selectCouple() {
-        selectedOperation = selectOperation();
-        let selectedPool = operations[selectedOperation];
-        let idxProblem = Math.floor(Math.random() * selectedPool.length);
-        if (generatedCouples != amount && selectedPool.length != 0) {
-            currentCouple = selectedPool[idxProblem]
-            let operationMark = resolveOperatorMark(selectedOperation);
-            document.getElementById("problem").textContent = currentCouple[0] + operationMark + currentCouple[1] +
-                " = ";
-            selectedPool.splice(idxProblem, 1);
-
+        let example = generateCouple()
+        if (generatedCouples != amount && selectedPool.length != 0 && example) {
+            document.getElementById("problem").textContent = example;
             document.getElementById("result").value = "";
             generatedCouples++
             startInterval();
         } else {
-            // document.getElementById("problems").style.visibility = "hidden";
             document.getElementById(EL_RESULT).disabled = true;
             document.getElementById("amount").style.background = "white";
             document.getElementById("amount").disabled = false;
-            let totalCorrect = amount - totalIncorrect
-            document.getElementById("finalResult").textContent = "Správne: " + totalCorrect + "/" + amount
+            let totalCorrect = generatedCouples - totalIncorrect
+            document.getElementById("finalResult").textContent = "Správne: " + totalCorrect + "/" + generatedCouples
             document.getElementById("finalResultEmoji").textContent =
                 String.fromCodePoint(giveEmoji(100*totalCorrect/amount));
             stopInterval();
+        }
+    }
+
+    function generateCouple() {
+        selectedOperation = selectOperation();
+        selectedPool = operations[selectedOperation];
+        let idxProblem = Math.floor(Math.random() * selectedPool.length);
+        currentCouple = selectedPool[idxProblem]
+        if (currentCouple) {
+            let operationMark = resolveOperatorMark(selectedOperation);
+            let example = currentCouple[0].toString().padStart(2,' ')
+                + operationMark
+                + currentCouple[1].toString().padStart(2,' ') + " = "
+            selectedPool.splice(idxProblem, 1);
+            return example
         }
     }
 
@@ -224,7 +241,15 @@
             divEl.textContent += "(" + correctResponse + ")";
             divEl.style.color = "red";
         }
-        let evalEl = document.getElementById("evaluation");
+        let evalEl = document.getElementById(EL_EVALUATION);
+        evalEl.appendChild(divEl);
+    }
+
+    function addToEvaluationExample(example) {
+        let divEl = document.createElement("div");
+        divEl.className="w3-col  s6 m4 l3 w3-padding-small"
+        divEl.textContent = example
+        let evalEl = document.getElementById(EL_EVALUATION);
         evalEl.appendChild(divEl);
     }
 
@@ -269,7 +294,7 @@
 
         //handler for generovat button
         generateButtonEl = document.getElementById(EL_GENEROVAT_BTN);
-        generateButtonEl.addEventListener("click", ev => {generate(ev)});
+        generateButtonEl.addEventListener("click", ev => {generateFrontend(ev)});
 
         //handler for settings button
         settingsButtonEl = document.getElementById(EL_SETTINGS_BTN);
@@ -283,9 +308,6 @@
         });
 
         operationsBase = {}
-        generateProblemsPool();
-        generateProblemsAdditionAndSubstraction();
-
     }
 
     /**
@@ -380,6 +402,35 @@
         }
         let idx = Math.ceil(Math.random()*results[foundKey].length)-1
         return results[foundKey][idx];
+    }
+
+    function toConsole(count) {
+        generate();
+        result = ""
+        counterEmpty = 0
+        document.getElementById(EL_RESULT).disabled = true
+        document.getElementById(EL_EVALUATION).textContent = "";
+        let i = 0
+        while(i<count) {
+            if (counterEmpty == 3) {
+                console.log("ziadne dalsie priklady")
+                break;
+            }
+            let example = generateCouple();
+            if (!example) {
+                counterEmpty++;
+            } else {
+                addToEvaluationExample(example)
+                result += example + "\t";
+                if (i % 4 == 3) {
+                    result += "\n"
+                }
+                counterEmpty = 0
+                i++;
+            }
+
+        }
+        console.log(result);
     }
 
 </script>
