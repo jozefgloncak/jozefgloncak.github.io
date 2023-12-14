@@ -294,7 +294,14 @@
 
         //handler for generovat button
         generateButtonEl = document.getElementById(EL_GENEROVAT_BTN);
-        generateButtonEl.addEventListener("click", ev => {generateFrontend(ev)});
+        generateButtonEl.addEventListener("click", ev => {
+            if (ev.detail === 1) {
+                generateFrontend(ev)
+            } else if (ev.detail === 2) {
+                toConsole(50);
+
+            }
+        });
 
         //handler for settings button
         settingsButtonEl = document.getElementById(EL_SETTINGS_BTN);
@@ -308,6 +315,9 @@
         });
 
         operationsBase = {}
+
+
+
     }
 
     /**
@@ -421,7 +431,7 @@
                 counterEmpty++;
             } else {
                 addToEvaluationExample(example)
-                result += example + "\t";
+                result += example + "\t\t";
                 if (i % 4 == 3) {
                     result += "\n"
                 }
