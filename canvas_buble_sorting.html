@@ -211,26 +211,26 @@ canvas {
             return false;
         }
 
-        /**
-         * Select sort without steps
-         */
-        function selectSort() {
-            //i - pointer to first element of unsorted part
-            for (let i = 0; i < numbers.length - 1; i++) {
-                indMin = i;
-                for (let j = i + 1; j < numbers.length ; j++) {
-                    if (numbers[j] < numbers[indMin]) {
-                        _switchNumbers(numbers, j, indMin);
-                    }
-                }
-            }
-        }
         function _switchNumbers(arr, idx1, idx2) {
             let temp = arr[idx1];
             numbers[idx1] = numbers[idx2]
             numbers[idx2] = temp;
         }
-
+        
+        // /**
+        //  * Select sort without steps
+        //  */
+        // function selectSort() {
+        //     //i - pointer to first element of unsorted part
+        //     for (let i = 0; i < numbers.length - 1; i++) {
+        //         indMin = i;
+        //         for (let j = i + 1; j < numbers.length ; j++) {
+        //             if (numbers[j] < numbers[indMin]) {
+        //                 _switchNumbers(numbers, j, indMin);
+        //             }
+        //         }
+        //     }
+        // }
 
         // /**
         //  * Insert sort without steps.
