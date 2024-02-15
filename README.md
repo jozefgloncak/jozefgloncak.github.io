@@ -28,6 +28,10 @@ To see how would HTML page looks like add (after click on page) prefix **https:/
 * [canvas_square_circling.html](canvas_square_circling.html) - square is going in circle which has still the same diameter and speed is constant. Nothing depends on frame frequency
 * [canvas_buble_sorting.html](canvas_buble_sorting.html) - sorting demo (quick sort). Demonstrate (step-by-step) how quick sort alrogithm works. It is possible to view it in automatic mode (no interaction) or manual mode where it is possible to klik on button to get to next step of algorithm. In automatic mode it is possible to specify frequency of rendering next sorting step.
 
+### graphs
+
+* [graph-plotly.html](graph-plotly.html) - demonstrate usage of library **plotly**
+
 ## study code
 Contains code which was developed during study of some frontend development aspect.
 

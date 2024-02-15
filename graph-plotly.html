@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+    label {
+        display:block
+    }
+
+    .contItem {
+        margin-right: 5px
+    }
+
+    .container {
+        display:flex
+    }
+</style>
+<script>
+
+    function generateGraph() {
+        elFunc = document.getElementById("func")
+        console.log("el func value:", elFunc.value)
+        fun_str = elFunc.value ? elFunc.value : "4*x + 5";
+        console.log("fun_str", fun_str)
+        xVal = [];
+        yVal = []
+        xFromElVal = document.getElementById("xFrom").value
+        xFromVar = xFromElVal ? xFromElVal : 20
+        xToElVal = document.getElementById("xTo").value
+        xToVar = xToElVal ? xToElVal : 20
+        for (let x = xFromVar; x <= xToVar; x++) {
+            xVal.push(x);
+            // console.log("x", x)
+            y = eval(fun_str)
+            // console.log("y", y)
+            yVal.push(y)
+        }
+
+        const data = [{
+            x: xVal,
+            y: yVal,
+            mode: "lines"
+        }];
+
+        const layout = {title: fun_str};
+
+
+        Plotly.newPlot("myPlot", data, layout);
+    }
+</script>
+
+
+<body >
+    <div id="myPlot" style="width:100%;max-width:700px"></div>
+    <div class="container">
+        <div class="contItem">
+            <label for="xFrom" >X from:</label>
+            <input id="xFrom" type="text" value="-20" />
+        </div>
+        <div class="contItem">
+            <label for="xTo" >X to:</label>
+            <input id="xTo" type="text" value="20" />
+        </div>
+    </div>
+    <label for="func" >function:</label>
+    <input id="func" type="text" title="use variable 'x'. example1: 4*x + 5, example2 4*x*x + 3*x + 1, example3: x*x*x + 12*x*x -4*x - 240" value="4*x + 5"/>
+    <input type="button" value="Draw graph" onclick="generateGraph()" />
+</body>
+</html>
